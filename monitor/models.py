@@ -31,12 +31,12 @@ class Monitor(models.Model):
     name = models.CharField(max_length=255)
     url = models.URLField()
     check_interval_seconds = models.IntegerField(validators=[MinValueValidator(1)])
-    timeout_seconds = models.IntegerField(default=30)
-    accepted_status_code = models.JSONField(default=default_status_codes)
+    timeout_seconds = models.IntegerField(default=30, validators=[MinValueValidator(1)])
+    accepted_status_codes = models.JSONField(default=default_status_codes)
     is_active = models.BooleanField(default=True)
     consecutive_failures_threshold = models.IntegerField(default=2)
     slow_response_threshold_ms = models.IntegerField(null=True, blank=True)
-    has_run_first_check = models.BooleanField
+    has_run_first_check = models.BooleanField(default=False)
     http_method = models.CharField(
         max_length=10, choices=HTTP_METHOD_CHOICES, default="HEAD"
     )
@@ -48,7 +48,7 @@ class Monitor(models.Model):
     )
     auth_username = models.CharField(max_length=255, blank=True)
     auth_password = models.CharField(max_length=255, blank=True)
-    follow_redirect = models.BooleanField(default=True)
+    follow_redirects = models.BooleanField(default=True)
     ip_version = models.CharField(
         max_length=20, choices=IP_VERSION_CHOICES, default="ipv4_priority"
     )
