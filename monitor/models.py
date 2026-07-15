@@ -33,7 +33,7 @@ class Monitor(models.Model):
     check_interval_seconds = models.IntegerField(validators=[MinValueValidator(1)])
     timeout_seconds = models.IntegerField(default=30)
     accepted_status_code = models.JSONField(default=default_status_codes)
-    is_active = models.BooleanField
+    is_active = models.BooleanField(default=True)
     consecutive_failures_threshold = models.IntegerField(default=2)
     slow_response_threshold_ms = models.IntegerField(null=True, blank=True)
     has_run_first_check = models.BooleanField
