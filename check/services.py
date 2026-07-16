@@ -38,3 +38,16 @@ def execute_check(monitor):
         )
 
         return check
+
+
+def should_run_check(monitor):
+    last_check = monitor.checks.first()
+
+    if not last_check:
+        return True
+
+    now = timezone.now()
+
+    elapsed_seconds = (now - last_check.executed_at).total_seconds()
+
+    return elapsed_seconds >= monitor.check_interval_seconds
