@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from monitor.models import Monitor
 from check.services import execute_check, should_run_check
+from incident.services import determine_status, handle_incident
 
 
 class Command(BaseCommand):
@@ -16,7 +17,11 @@ class Command(BaseCommand):
             if should_run_check(monitor):
 
                 self.stdout.write(f"Controllo monitor: {monitor.name}")
+                
                 check = execute_check(monitor)
+                status = determine_status(monitor)
+
+                handle_incident(monitor, status, check)
 
                 self.stdout.write(f"Risultato: {check.success}")
             else:

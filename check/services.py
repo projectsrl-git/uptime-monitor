@@ -37,7 +37,11 @@ def execute_check(monitor):
             error_message=str(e),
         )
 
-        return check
+    if not monitor.has_run_first_check:
+        monitor.has_run_first_check = True
+        monitor.save(update_fields=["has_run_first_check"])
+
+    return check
 
 
 def should_run_check(monitor):
