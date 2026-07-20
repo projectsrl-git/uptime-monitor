@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "monitor",
     "check",
+    "incident",
 ]
 
 MIDDLEWARE = [
