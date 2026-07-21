@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "monitor",
     "check",
     "incident",
+    "notification",
 ]
 
 MIDDLEWARE = [
