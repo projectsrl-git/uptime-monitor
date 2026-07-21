@@ -1,5 +1,6 @@
 from django.utils import timezone
 from incident.models import Incident
+from notification.services.notification_service import notify
 
 
 def determine_status(monitor):
@@ -33,7 +34,8 @@ def handle_incident(monitor, status, check):
 
             root_cause = get_root_cause(check)
 
-            Incident.objects.create(monitor=monitor, root_cause=root_cause)
+            incident = Incident.objects.create(monitor=monitor, root_cause=root_cause)
+            notify("down", incident)
 
     elif status == "up":
 
@@ -49,6 +51,7 @@ def handle_incident(monitor, status, check):
             )
 
             open_incident.save(update_fields=["ended_at", "duration_seconds"])
+            notify("up", open_incident)
 
 
 def get_root_cause(check):
