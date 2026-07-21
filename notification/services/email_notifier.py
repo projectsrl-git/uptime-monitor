@@ -14,7 +14,9 @@ class EmailNotifier:
 
         subject = f"Monitor {event.upper()}: " f"{incident.monitor.name}"
 
-        message = f"""
+        if event == "down":
+
+            message = f"""
 Monitor:
 {incident.monitor.name}
 
@@ -22,7 +24,35 @@ URL:
 {incident.monitor.url}
 
 Evento:
-{event.upper()}
+DOWN
+
+Data inizio incidente:
+{incident.started_at}
+
+Root cause:
+{incident.root_cause}
+"""
+
+        else:
+
+            message = f"""
+Monitor:
+{incident.monitor.name}
+
+URL:
+{incident.monitor.url}
+
+Evento:
+UP
+
+Inizio incidente:
+{incident.started_at}
+
+Fine incidente:
+{incident.ended_at}
+
+Durata downtime:
+{incident.duration_seconds} secondi
 """
 
         send_mail(
