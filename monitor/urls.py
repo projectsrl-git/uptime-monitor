@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import MonitorViewSet
+from .views import MonitorViewSet, MonitorUptimeView
 
 router = DefaultRouter()
 router.register("monitors", MonitorViewSet, basename="monitor")
@@ -9,4 +9,5 @@ router.register("monitors", MonitorViewSet, basename="monitor")
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("monitors/<int:pk>/uptime/", MonitorUptimeView.as_view()),
 ]
