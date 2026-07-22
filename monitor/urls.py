@@ -5,6 +5,7 @@ from .views import (
     MonitorViewSet,
     MonitorUptimeView,
     MonitorCheckHistoryView,
+    MonitorIncidentHistoryView,
 )
 
 router = DefaultRouter()
@@ -17,5 +18,9 @@ urlpatterns = [
     path(
         "monitors/<int:pk>/checks/",
         MonitorCheckHistoryView.as_view(),
+    ),
+    path(
+        "monitors/<int:pk>/incidents/",
+        MonitorIncidentHistoryView.as_view(),
     ),
 ]
