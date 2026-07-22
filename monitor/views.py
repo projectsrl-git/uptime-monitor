@@ -3,6 +3,8 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 
 from .models import Monitor
+from check.models import Check
+from check.serializer import CheckSerializer
 from .serializer import MonitorSerializer
 from .services.period_service import get_period_range, parse_date
 from .services.uptime_service import calculate_uptime
@@ -63,3 +65,47 @@ class MonitorUptimeView(APIView):
         )
 
         return Response(result)
+
+
+class MonitorCheckHistoryView(APIView):
+
+    def get(self, request, pk):
+
+        try:
+            monitor = Monitor.objects.get(id=pk)
+
+        except Monitor.DoesNotExist:
+            return Response(
+                {"detail": "Monitor non trovato"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        checks = monitor.checks.all()
+
+        try:
+            from_date = parse_date(request.query_params.get("from"))
+
+            to_date = parse_date(request.query_params.get("to"))
+
+        except ValueError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if from_date:
+            checks = checks.filter(
+                executed_at__gte=from_date,
+            )
+
+        if to_date:
+            checks = checks.filter(
+                executed_at__lte=to_date,
+            )
+
+        serializer = CheckSerializer(
+            checks,
+            many=True,
+        )
+
+        return Response(serializer.data)
