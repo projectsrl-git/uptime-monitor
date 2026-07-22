@@ -1,5 +1,19 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
+
 from django.utils import timezone
+
+
+def parse_date(value):
+    if not value:
+        return None
+
+    try:
+        dt = datetime.fromisoformat(value)
+
+        return timezone.make_aware(dt)
+
+    except ValueError:
+        raise ValueError("Formato data non valido. Usa YYYY-MM-DD")
 
 
 def get_period_range(
@@ -37,7 +51,7 @@ def get_period_range(
     if period == "custom":
 
         if not from_date or not to_date:
-            raise ValueError("Per custom servono from e to")
+            raise ValueError("Per il periodo custom sono richiesti from e to")
 
         return (
             from_date,

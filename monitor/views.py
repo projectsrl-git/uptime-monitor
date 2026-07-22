@@ -1,12 +1,10 @@
-from datetime import datetime
-
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
 from .models import Monitor
 from .serializer import MonitorSerializer
-from .services.period_service import get_period_range
+from .services.period_service import get_period_range, parse_date
 from .services.uptime_service import calculate_uptime
 
 
@@ -34,25 +32,18 @@ class MonitorUptimeView(APIView):
                 {"detail": "Monitor non trovato"}, status=status.HTTP_404_NOT_FOUND
             )
 
-        period = request.query_params.get("period", "24h")
+        period = request.query_params.get(
+            "period",
+            "24h",
+        )
 
         from_date = request.query_params.get("from")
         to_date = request.query_params.get("to")
 
         try:
-            if from_date:
-                from_date = datetime.fromisoformat(from_date)
+            from_date = parse_date(from_date)
+            to_date = parse_date(to_date)
 
-            if to_date:
-                to_date = datetime.fromisoformat(to_date)
-
-        except ValueError:
-            return Response(
-                {"detail": "Formato data non valido"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        try:
             start_date, end_date = get_period_range(
                 period,
                 from_date,
@@ -60,7 +51,10 @@ class MonitorUptimeView(APIView):
             )
 
         except ValueError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         result = calculate_uptime(
             monitor,

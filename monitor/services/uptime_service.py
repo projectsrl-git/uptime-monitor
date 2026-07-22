@@ -4,13 +4,15 @@ from django.db.models import Avg, Min, Max
 
 def calculate_uptime(monitor, start_date, end_date):
 
-    if not has_checks_in_period(
+    start_date = max(start_date, monitor.created_at)
+    end_date = min(end_date, timezone.now())
+
+    if start_date >= end_date or not has_checks_in_period(
         monitor,
         start_date,
         end_date,
     ):
         return {
-            "status": "no_data",
             "uptime_percentage": None,
             "mtbf_seconds": None,
             "downtime_seconds": None,
