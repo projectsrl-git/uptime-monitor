@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from rest_framework.filters import OrderingFilter
 
 from django.db.models import Q
 
@@ -22,6 +23,17 @@ VALID_STATUS = (
 
 class MonitorViewSet(viewsets.ModelViewSet):
     queryset = Monitor.objects.all()
+
+    filter_backends = [OrderingFilter]
+
+    ordering_fields = [
+        "name",
+        "created_at",
+    ]
+
+    ordering = [
+        "name",
+    ]
 
     def get_serializer_class(self):
 
