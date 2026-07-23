@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 
 from django.db.models import Q
 
@@ -10,6 +11,13 @@ from incident.serializer import IncidentSerializer
 from .serializer import MonitorReadSerializer, MonitorWriteSerializer
 from .services.period_service import get_period_range, parse_date
 from .services.uptime_service import calculate_uptime
+
+VALID_STATUS = (
+    "up",
+    "down",
+    "paused",
+    "not_started",
+)
 
 
 class MonitorViewSet(viewsets.ModelViewSet):
@@ -25,6 +33,50 @@ class MonitorViewSet(viewsets.ModelViewSet):
             return MonitorWriteSerializer
 
         return MonitorReadSerializer
+
+    def get_queryset(self):
+
+        queryset = Monitor.objects.all()
+
+        status = self.request.query_params.get("status")
+
+        if status is None:
+            return queryset
+
+        if status not in VALID_STATUS:
+            raise ValidationError(
+                {
+                    "status": (
+                        "Valore non valido. "
+                        f"Valori consentiti: {', '.join(VALID_STATUS)}"
+                    )
+                }
+            )
+
+        if status == "paused":
+            return queryset.filter(is_active=False)
+
+        if status == "not_started":
+            return queryset.filter(
+                is_active=True,
+                has_run_first_check=False,
+            )
+
+        if status == "down":
+            return queryset.filter(
+                incidents__isnull=False,
+                incidents__ended_at__isnull=True,
+            ).distinct()
+
+        if status == "up":
+            return queryset.filter(
+                is_active=True,
+                has_run_first_check=True,
+            ).exclude(
+                incidents__ended_at__isnull=True,
+            )
+
+        return queryset
 
     def destroy(self, request, *args, **kwargs):
         monitor = self.get_object()
