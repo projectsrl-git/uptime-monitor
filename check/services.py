@@ -25,8 +25,6 @@ def execute_check(monitor):
             status_code=response.status_code,
         )
 
-        return check
-
     except requests.RequestException as e:
         response_time_ms = int((time.time() - start_time) * 1000)
 

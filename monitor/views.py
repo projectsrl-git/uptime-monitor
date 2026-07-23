@@ -7,14 +7,24 @@ from django.db.models import Q
 from .models import Monitor
 from check.serializer import CheckSerializer
 from incident.serializer import IncidentSerializer
-from .serializer import MonitorSerializer
+from .serializer import MonitorReadSerializer, MonitorWriteSerializer
 from .services.period_service import get_period_range, parse_date
 from .services.uptime_service import calculate_uptime
 
 
 class MonitorViewSet(viewsets.ModelViewSet):
     queryset = Monitor.objects.all()
-    serializer_class = MonitorSerializer
+
+    def get_serializer_class(self):
+
+        if self.action in (
+            "create",
+            "update",
+            "partial_update",
+        ):
+            return MonitorWriteSerializer
+
+        return MonitorReadSerializer
 
     def destroy(self, request, *args, **kwargs):
         monitor = self.get_object()
