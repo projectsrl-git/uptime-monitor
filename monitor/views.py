@@ -228,12 +228,21 @@ class MonitorCheckHistoryView(APIView):
                 executed_at__lte=to_date,
             )
 
-        serializer = CheckSerializer(
+        paginator = StandardResultsSetPagination()
+
+        page = paginator.paginate_queryset(
             checks,
+            request,
+        )
+
+        serializer = CheckSerializer(
+            page,
             many=True,
         )
 
-        return Response(serializer.data)
+        return paginator.get_paginated_response(
+            serializer.data,
+        )
 
 
 class MonitorIncidentHistoryView(APIView):
@@ -276,9 +285,19 @@ class MonitorIncidentHistoryView(APIView):
             incidents = incidents.filter(
                 started_at__lte=to_date,
             )
-        serializer = IncidentSerializer(
+
+        paginator = StandardResultsSetPagination()
+
+        page = paginator.paginate_queryset(
             incidents,
+            request,
+        )
+
+        serializer = IncidentSerializer(
+            page,
             many=True,
         )
 
-        return Response(serializer.data)
+        return paginator.get_paginated_response(
+            serializer.data,
+        )
