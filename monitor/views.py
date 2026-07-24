@@ -99,6 +99,46 @@ class MonitorViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    def list(self, request, *args, **kwargs):
+
+        ordering = request.query_params.get("ordering")
+
+        if ordering not in ("status", "-status"):
+            return super().list(request, *args, **kwargs)
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        if ordering == "status":
+            priority = {
+                "up": 0,
+                "down": 1,
+                "paused": 2,
+                "not_started": 3,
+            }
+
+        else:  # -status
+            priority = {
+                "down": 0,
+                "up": 1,
+                "paused": 2,
+                "not_started": 3,
+            }
+
+        monitors = sorted(
+            queryset,
+            key=lambda monitor: priority[monitor.status],
+        )
+
+        page = self.paginate_queryset(monitors)
+
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(monitors, many=True)
+
+        return Response(serializer.data)
+
     def destroy(self, request, *args, **kwargs):
         monitor = self.get_object()
         monitor.is_active = False
