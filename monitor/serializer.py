@@ -3,7 +3,6 @@ from urllib.parse import urlparse
 from rest_framework import serializers
 
 from .models import Monitor
-from incident.models import Incident
 
 
 class MonitorWriteSerializer(serializers.ModelSerializer):
@@ -31,22 +30,9 @@ class MonitorWriteSerializer(serializers.ModelSerializer):
 
 class MonitorReadSerializer(serializers.ModelSerializer):
 
-    status = serializers.SerializerMethodField()
+    status = serializers.ReadOnlyField()
 
     class Meta:
         model = Monitor
 
         fields = "__all__"
-
-    def get_status(self, obj):
-
-        if not obj.has_run_first_check:
-            return "not_started"
-
-        if Incident.objects.filter(
-            monitor=obj,
-            ended_at__isnull=True,
-        ).exists():
-            return "down"
-
-        return "up"

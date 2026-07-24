@@ -4,9 +4,10 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
 
-from django.db.models import Q
+from django.db.models import Q, Exists, OuterRef
 
 from .models import Monitor
+from incident.models import Incident
 from check.serializer import CheckSerializer
 from incident.serializer import IncidentSerializer
 from .serializer import MonitorReadSerializer, MonitorWriteSerializer
@@ -51,7 +52,14 @@ class MonitorViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
 
-        queryset = Monitor.objects.all()
+        queryset = super().get_queryset()
+
+        open_incidents = Incident.objects.filter(
+            monitor=OuterRef("pk"),
+            ended_at__isnull=True,
+        )
+
+        queryset = queryset.annotate(has_open_incident=Exists(open_incidents))
 
         status = self.request.query_params.get("status")
 
@@ -79,16 +87,14 @@ class MonitorViewSet(viewsets.ModelViewSet):
 
         if status == "down":
             return queryset.filter(
-                incidents__isnull=False,
-                incidents__ended_at__isnull=True,
-            ).distinct()
+                has_open_incident=True,
+            )
 
         if status == "up":
             return queryset.filter(
                 is_active=True,
                 has_run_first_check=True,
-            ).exclude(
-                incidents__ended_at__isnull=True,
+                has_open_incident=False,
             )
 
         return queryset
