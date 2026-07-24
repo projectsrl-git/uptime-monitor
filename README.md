@@ -178,11 +178,348 @@ python manage.py run_checks
 
 ---
 
-## Roadmap
+# API REST
 
-- [x] BR1 - CRUD Monitor
-- [x] BR2 - Scheduler e Check
-- [x] BR3 - Incidenti
-- [x] BR4 - Notifiche
-- [x] BR5 - Uptime
-- [ ] BR6 - API complete
+Base URL:
+
+```
+/api/
+```
+
+---
+
+# Monitors
+
+## Elenco monitor
+
+```
+GET /api/monitors/
+```
+
+Restituisce l'elenco dei monitor disponibili.
+
+### Filtri disponibili
+
+Il parametro `status` permette di filtrare i monitor per stato corrente.
+
+Esempio:
+
+```
+GET /api/monitors/?status=up
+```
+
+Valori ammessi:
+
+- `up`
+- `down`
+- `paused`
+- `not_started`
+
+Esempi:
+
+```
+GET /api/monitors/?status=down
+```
+
+restituisce solo i monitor con incidenti attivi.
+
+```
+GET /api/monitors/?status=paused
+```
+
+restituisce i monitor disattivati.
+
+---
+
+## Ordinamento
+
+Il parametro `ordering` permette di ordinare i risultati.
+
+Formato:
+
+```
+?ordering=<campo>
+```
+
+Campi disponibili:
+
+| Parametro | Descrizione |
+|---|---|
+| `name` | ordine alfabetico crescente |
+| `-name` | ordine alfabetico decrescente |
+| `created_at` | monitor meno recenti prima |
+| `-created_at` | monitor più recenti prima |
+| `status` | monitor UP prima |
+| `-status` | monitor DOWN prima |
+
+Esempi:
+
+```
+GET /api/monitors/?ordering=name
+
+GET /api/monitors/?ordering=-created_at
+
+GET /api/monitors/?ordering=-status
+```
+
+---
+
+## Paginazione
+
+Gli endpoint che restituiscono liste supportano la paginazione tramite `PageNumberPagination`.
+
+Parametri disponibili:
+
+```
+?page=1
+```
+
+e:
+
+```
+?page_size=20
+```
+
+Esempio:
+
+```
+GET /api/monitors/?page=2&page_size=20
+```
+
+Formato risposta:
+
+```json
+{
+    "count": 50,
+    "next": "/api/monitors/?page=3",
+    "previous": "/api/monitors/?page=1",
+    "results": []
+}
+```
+
+---
+
+## Creazione Monitor
+
+```
+POST /api/monitors/
+```
+
+Crea un nuovo monitor.
+
+Risposte:
+
+- 201 Created se il monitor viene creato correttamente.
+- 400 Bad Request se i dati inviati non sono validi.
+
+---
+
+# Eliminazione monitor
+
+## Endpoint
+
+```
+ DELETE /api/monitors/{id}/
+```
+
+L'eliminazione esegue una disattivazione logica del monitor impostando il campo `is_active` a `false`.
+
+## Risposta
+
+```
+204 No Content
+```
+
+---
+
+# Stato corrente monitor
+
+## Endpoint
+
+```
+GET /api/monitors/{id}/
+```
+
+La risposta include lo stato corrente calcolato del monitor.
+
+Valori possibili:
+
+- `up`
+- `down`
+- `paused`
+- `not_started`
+
+## Esempio risposta
+
+```json
+{
+"id": 1,
+"name": "Google",
+"status": "up"
+}
+```
+
+---
+
+# Storico check
+
+## Endpoint
+
+```
+GET /api/monitors/{id}/checks/
+```
+
+Restituisce lo storico dei controlli eseguiti dal monitor.
+
+## Parametri opzionali
+
+- `from`: data iniziale nel formato `YYYY-MM-DD`
+- `to`: data finale nel formato `YYYY-MM-DD`
+
+## Esempio richiesta
+
+[INSERIRE BLOCCO CODICE: esempio GET `/api/monitors/1/checks/?from=2026-07-01&to=2026-07-24`]
+
+L'endpoint supporta la paginazione tramite:
+
+- `page`
+- `page_size`
+
+---
+# Storico incidenti
+
+## Endpoint
+
+[INSERIRE BLOCCO CODICE: metodo GET con endpoint `/api/monitors/{id}/incidents/`]
+
+Restituisce lo storico degli incidenti associati al monitor.
+
+## Parametri opzionali
+
+- `from`: data iniziale nel formato `YYYY-MM-DD`
+- `to`: data finale nel formato `YYYY-MM-DD`
+
+## Esempio richiesta
+
+[INSERIRE BLOCCO CODICE: esempio GET `/api/monitors/1/incidents/?from=2026-07-01`]
+
+L'endpoint supporta la paginazione tramite:
+
+- `page`
+- `page_size`
+
+---
+
+# Uptime monitor
+
+## Endpoint
+
+```
+GET /api/monitors/{id}/uptime/
+```
+
+Restituisce le statistiche di uptime del monitor calcolate su un intervallo temporale.
+
+## Periodi disponibili
+
+Periodi predefiniti:
+
+```
+?period=24h
+```
+```
+?period=7d
+```
+```
+?period=30d
+```
+
+Intervallo personalizzato:
+
+```
+?period=custom&from=2026-07-01&to=2026-07-24
+```
+
+## Esempio risposta
+
+```json
+{
+    "uptime_percentage": 99.98,
+    "downtime_seconds": 10,
+    "mtbf_seconds": 3600,
+    "response_time": {
+        "average_ms": 120,
+        "minimum_ms": 80,
+        "maximum_ms": 200
+    }
+}
+```
+---
+
+# Gestione errori
+
+Gli errori delle API vengono restituiti in formato JSON con un messaggio descrittivo.
+
+## Esempio errore
+
+```json
+{
+    "detail": "Monitor non trovato"
+}
+```
+
+---
+
+# Codici HTTP utilizzati
+
+| Codice HTTP | Significato |
+|-------------|-------------|
+| 200 OK | Richiesta completata correttamente |
+| 201 Created | Risorsa creata correttamente |
+| 204 No Content | Operazione completata senza contenuto |
+| 400 Bad Request | Richiesta non valida |
+| 404 Not Found | Risorsa non trovata |
+
+---
+
+# Struttura generale API
+
+Tutte le API sono esposte sotto il prefisso:
+
+```
+/api/
+```
+
+Gli endpoint principali disponibili sono:
+
+- `/api/monitors/`
+- `/api/monitors/{id}/`
+- `/api/monitors/{id}/checks/`
+- `/api/monitors/{id}/incidents/`
+- `/api/monitors/{id}/uptime/`
+
+---
+
+# Paginazione
+
+Gli endpoint che restituiscono liste utilizzano la paginazione standard DRF.
+
+Parametri disponibili:
+
+- `page`
+- `page_size`
+
+Esempio:
+
+```
+?page=2&page_size=20
+```
+
+La risposta contiene:
+
+- numero totale di risultati
+- pagina successiva
+- pagina precedente
+- risultati della pagina corrente
+
+---
