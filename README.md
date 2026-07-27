@@ -91,6 +91,27 @@ L'applicazione permette di monitorare periodicamente endpoint HTTP/HTTPS, regist
 
 ---
 
+### BR6 - API RESTful
+
+- API RESTful per la gestione completa dei monitor
+- Operazioni CRUD sui monitor
+- Endpoint dedicati per:
+  - stato corrente del monitor
+  - storico dei check
+  - storico degli incidenti
+  - statistiche di uptime
+- Filtri sull'elenco monitor:
+  - stato (`up`, `down`, `paused`, `not_started`)
+- Ordinamento dell'elenco monitor:
+  - nome
+  - data di creazione
+  - stato
+- Paginazione degli endpoint che restituiscono collezioni
+- Serializer separati per lettura e scrittura
+- Risposte JSON con codici HTTP appropriati
+
+---
+
 ## Installazione
 
 ```bash
@@ -378,7 +399,9 @@ Restituisce lo storico dei controlli eseguiti dal monitor.
 
 ## Esempio richiesta
 
-[INSERIRE BLOCCO CODICE: esempio GET `/api/monitors/1/checks/?from=2026-07-01&to=2026-07-24`]
+```
+GET /api/monitors/1/checks/?from=2026-07-01&to=2026-07-24
+```
 
 L'endpoint supporta la paginazione tramite:
 
@@ -390,7 +413,9 @@ L'endpoint supporta la paginazione tramite:
 
 ## Endpoint
 
-[INSERIRE BLOCCO CODICE: metodo GET con endpoint `/api/monitors/{id}/incidents/`]
+```
+GET /api/monitors/{id}/incidents/
+```
 
 Restituisce lo storico degli incidenti associati al monitor.
 
@@ -401,7 +426,9 @@ Restituisce lo storico degli incidenti associati al monitor.
 
 ## Esempio richiesta
 
-[INSERIRE BLOCCO CODICE: esempio GET `/api/monitors/1/incidents/?from=2026-07-01`]
+```
+GET /api/monitors/1/incidents/?from=2026-07-01
+```
 
 L'endpoint supporta la paginazione tramite:
 
