@@ -104,24 +104,15 @@ def get_mtbf(monitor, start_date, end_date):
 
     total_seconds = (end_date - start_date).total_seconds()
 
-    downtime = get_total_downtime(
-    monitor,
-    start_date,
-    end_date,
-)
-
-    uptime = total_seconds - downtime
-
-    incidents_count = get_incidents_in_period(
-        monitor,
-        start_date,
-        end_date,
+    incidents_count = monitor.incidents.filter(
+        started_at__gte=start_date,
+        started_at__lt=end_date,
     ).count()
 
     if incidents_count == 0:
         return int(total_seconds)
 
-    return int(uptime / incidents_count)
+    return int(total_seconds / incidents_count)
 
 
 def get_response_statistics(monitor, start_date, end_date):
