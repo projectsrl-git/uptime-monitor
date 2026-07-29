@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            Uptime Monitor
+        </h1>
+
+        <button class="btn btn-primary">
+            Nuovo Monitor
+        </button>
+    </div>
+
+    <!-- Statistiche -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-secondary">
+                        Totali
+                    </h6>
+
+                    <h2 id="total-monitors">
+                        -
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-secondary">
+                        UP
+                    </h6>
+
+                    <h2 id="up-monitors">
+                        -
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-secondary">
+                        DOWN
+                    </h6>
+
+                    <h2 id="down-monitors">
+                        -
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-secondary">
+                        Paused
+                    </h6>
+
+                    <h2 id="paused-monitors">
+                        -
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista monitor -->
+    <div class="card">
+
+        <div class="card-header">
+            Monitor
+        </div>
+
+        <div class="card-body">
+            <div id="monitor-list">
+                Caricamento monitor...
+            </div>
+
+            <template id="monitor-card-template">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="monitor-name"></h5>
+
+                                <p class="monitor-url text-secondary mb-0"></p>
+                            </div>
+
+                            <span class="badge monitor-status"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/home.js' %}"></script>
+{% endblock %}
