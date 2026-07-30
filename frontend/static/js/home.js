@@ -41,6 +41,8 @@ function renderMonitors(monitors) {
     monitors.forEach(monitor => {
         const card = template.content.cloneNode(true);
 
+        const cardElement = card.querySelector(".card");
+
         card.querySelector(
             ".monitor-name"
         ).textContent = monitor.name;
@@ -49,13 +51,16 @@ function renderMonitors(monitors) {
             ".monitor-url"
         ).textContent = monitor.url;
 
-        card.querySelector(".monitor-interval").textContent =
-            formatInterval(monitor.check_interval_seconds);
+        card.querySelector(
+            ".monitor-interval"
+        ).textContent = formatInterval(monitor.check_interval_seconds);
 
         const status = card.querySelector(".monitor-status");
         setStatusBadge(status, monitor.status);
-        
+
         container.appendChild(card);
+
+        loadUptime(monitor.id, cardElement);
     });
 }
 
@@ -100,7 +105,7 @@ function updateStatistics(monitors) {
 }
 
 function setStatusBadge(badge, status) {
-    badge.className = "badge rounded-pill monitor-status";
+    badge.className = "badge rounded-pill monitor-status me-2";
 
     switch (status) {
         case "up":
@@ -136,4 +141,31 @@ function formatInterval(seconds) {
 
     const minutes = seconds / 60;
     return `check ogni ${minutes}min`;
+}
+
+async function loadUptime(id, card) {
+    try {
+        const response = await fetch(
+            `/api/monitors/${id}/uptime/?period=24h`
+        );
+
+        if (!response.ok) {
+            throw new Error("Errore caricamento uptime");
+        }
+
+        const data = await response.json();
+          
+        card.querySelector(
+            ".monitor-uptime"
+        ).textContent = data.uptime_percentage !== null
+                ? `Uptime 24h: ${data.uptime_percentage}%`
+                : "Uptime 24h: N/D";
+
+    } catch (error) {
+        console.error(error);
+
+        card.querySelector(
+            ".monitor-uptime"
+        ).textContent = "Uptime 24h: N/D";
+    }
 }
