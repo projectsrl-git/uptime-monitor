@@ -49,16 +49,12 @@ function renderMonitors(monitors) {
             ".monitor-url"
         ).textContent = monitor.url;
 
-        const status = card.querySelector(
-            ".monitor-status"
-        );
+        card.querySelector(".monitor-interval").textContent =
+            formatInterval(monitor.check_interval_seconds);
 
-        status.textContent = monitor.status.toUpperCase();
-
-        status.classList.add(
-            getStatusClass(monitor.status)
-        );
-
+        const status = card.querySelector(".monitor-status");
+        setStatusBadge(status, monitor.status);
+        
         container.appendChild(card);
     });
 }
@@ -78,6 +74,10 @@ function updateStatistics(monitors) {
         monitor => monitor.status === "paused"
     ).length;
 
+    const not_started = monitors.filter(
+        monitor => monitor.status === "not_started"
+    ).length;
+
     document.getElementById(
         "total-monitors"
     ).textContent = total;
@@ -93,24 +93,47 @@ function updateStatistics(monitors) {
     document.getElementById(
         "paused-monitors"
     ).textContent = paused;
+
+    document.getElementById(
+        "not-started-monitors"
+    ).textContent = not_started;
 }
 
+function setStatusBadge(badge, status) {
+    badge.className = "badge rounded-pill monitor-status";
 
-function getStatusClass(status) {
     switch (status) {
         case "up":
-            return "bg-success";
+            badge.classList.add("bg-success");
+            badge.textContent = "UP";
+            break;
 
         case "down":
-            return "bg-danger";
+            badge.classList.add("bg-danger");
+            badge.textContent = "DOWN";
+            break;
 
         case "paused":
-            return "bg-secondary";
+            badge.classList.add("bg-warning", "text-dark");
+            badge.textContent = "PAUSED";
+            break;
 
         case "not_started":
-            return "bg-warning";
+            badge.classList.add("bg-secondary");
+            badge.textContent = "NOT STARTED";
+            break;
 
         default:
-            return "bg-secondary";
+            badge.classList.add("bg-secondary");
+            badge.textContent = status.toUpperCase();
     }
+}
+
+function formatInterval(seconds) {
+    if (seconds < 60) {
+        return `check ogni ${seconds}s`;
+    }
+
+    const minutes = seconds / 60;
+    return `check ogni ${minutes}min`;
 }

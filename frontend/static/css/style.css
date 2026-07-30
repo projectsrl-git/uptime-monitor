@@ -1,3 +1,8 @@
 body {
     background-color: #212529;
 }
+
+.card {
+    background-color: #2b3035;
+    border: 1px solid #495057;
+}
