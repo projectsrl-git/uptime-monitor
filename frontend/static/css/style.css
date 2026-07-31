@@ -7,6 +7,14 @@ body {
     border: 1px solid #495057;
 }
 
+.bg-success {
+    background-color: #17b932 !important;
+}
+
+.text-success {
+    color: #17b932 !important;
+}
+
 .uptime-circle-container {
     position: relative;
     width: 70px;
@@ -25,7 +33,7 @@ body {
 
 .circle-progress {
     fill: none;
-    stroke: #198754;
+    stroke: #17b932;
     stroke-width: 8;
 
     stroke-linecap: butt;

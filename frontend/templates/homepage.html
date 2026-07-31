@@ -68,28 +68,23 @@ Dashboard
     <div class="card mb-1 shadow-sm">
         <div class="card-body py-1">
             <div class="row align-items-center">
-
                 <div class="col-4">
-
                     <div class="d-flex align-items-center">
+                        <!-- nome -->
                         <h5 class="monitor-name me-2 mb-0"></h5>
-
+                        <!-- badge -->
                         <span class="badge monitor-status me-2"></span>
                     </div>
-
+                        <!-- ultima risposta -->
                     <p class="monitor-response-time text-muted small mb-0 fst-italic mt-2">
                         caricamento...
                     </p>
-
                 </div>
 
-
+                <!-- cerchio uptime -->
                 <div class="col-4 d-flex justify-content-center">
-
                     <div class="uptime-circle-container">
-
                         <svg class="uptime-circle" width="70" height="70">
-
                             <circle
                                 class="circle-bg"
                                 cx="35"
@@ -103,28 +98,21 @@ Dashboard
                                 cy="35"
                                 r="30">
                             </circle>
-
                         </svg>
 
                         <div class="uptime-circle-text">
                             <span class="uptime-percentage">-</span>
                             <small>24h</small>
                         </div>
-
                     </div>
-
                 </div>
 
-
-                <!-- DESTRA -->
                 <div class="col-4 text-end">
-
+                    <!-- intervallo check -->
                     <small class="monitor-interval text-muted fst-italic d-block"></small>
-
+                    <!-- ultimo check -->
                     <small class="monitor-last-check text-muted fst-italic d-block"></small>
-
                 </div>
-
             </div>
         </div>
     </div>
