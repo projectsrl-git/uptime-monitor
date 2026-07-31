@@ -6,3 +6,55 @@ body {
     background-color: #2b3035;
     border: 1px solid #495057;
 }
+
+.uptime-circle-container {
+    position: relative;
+    width: 70px;
+    height: 70px;
+}
+
+.uptime-circle {
+    transform: rotate(-90deg);
+}
+
+.circle-bg {
+    fill: none;
+    stroke: #e9ecef;
+    stroke-width: 8;
+}
+
+.circle-progress {
+    fill: none;
+    stroke: #198754;
+    stroke-width: 8;
+
+    stroke-linecap: butt;
+
+    stroke-dasharray: 188.4;
+    stroke-dashoffset: 188.4;
+
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.uptime-circle-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    text-align: center;
+    line-height: 1;
+}
+
+.uptime-circle-text span {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.uptime-circle-text small {
+    display: block;
+    font-size: 9px;
+    margin-top: 2px;
+}

@@ -48,19 +48,18 @@ function renderMonitors(monitors) {
         ).textContent = monitor.name;
 
         card.querySelector(
-            ".monitor-url"
-        ).textContent = monitor.url;
-
-        card.querySelector(
             ".monitor-interval"
         ).textContent = formatInterval(monitor.check_interval_seconds);
+
+        card.querySelector(".monitor-last-check").textContent =
+            formatLastCheck(monitor.last_check_at);
 
         const status = card.querySelector(".monitor-status");
         setStatusBadge(status, monitor.status);
 
         container.appendChild(card);
 
-        loadUptime(monitor.id, cardElement);
+        loadStats(monitor.id, cardElement, monitor);
     });
 }
 
@@ -143,7 +142,7 @@ function formatInterval(seconds) {
     return `check ogni ${minutes}min`;
 }
 
-async function loadUptime(id, card) {
+async function loadStats(id, card, monitor) {
     try {
         const response = await fetch(
             `/api/monitors/${id}/uptime/?period=24h`
@@ -154,18 +153,84 @@ async function loadUptime(id, card) {
         }
 
         const data = await response.json();
-          
+
+        setUptimeCircle(
+            card,
+            data.uptime_percentage
+        );
+
+        const responseTime = monitor.last_response_time_ms !== null
+            ? `${monitor.last_response_time_ms}ms`
+            : "N/D";
+
         card.querySelector(
-            ".monitor-uptime"
-        ).textContent = data.uptime_percentage !== null
-                ? `Uptime 24h: ${data.uptime_percentage}%`
-                : "Uptime 24h: N/D";
+            ".monitor-response-time"
+        ).textContent =
+            `ultima risposta: ${responseTime}`;
 
     } catch (error) {
         console.error(error);
 
         card.querySelector(
-            ".monitor-uptime"
-        ).textContent = "Uptime 24h: N/D";
+            ".monitor-stats"
+        ).textContent =
+            "ultima risposta: N/D";
+    }
+}
+
+function formatLastCheck(dateString) {
+    if (!dateString) {
+        return "ultimo check: N/D";
+    }
+
+    const seconds = Math.floor(
+        (Date.now() - new Date(dateString).getTime()) / 1000
+    );
+
+    if (seconds < 60) {
+        return `ultimo check: ${seconds}s`;
+    }
+
+    const minutes = Math.floor(seconds / 60);
+
+    if (minutes < 60) {
+        return `ultimo check: ${minutes}m`;
+    }
+
+    const hours = Math.floor(minutes / 60);
+
+    if (hours < 24) {
+        const remainingMinutes = minutes % 60;
+        return `ultimo check: ${hours}h ${remainingMinutes}m`;
+    }
+
+    const days = Math.floor(hours / 24);
+    return `ultimo check: ${days}g`;
+}
+
+function setUptimeCircle(card, percentage) {
+    const circle = card.querySelector(".circle-progress");
+    const text = card.querySelector(".uptime-percentage");
+
+    if (percentage === null) {
+        text.textContent = "N/D";
+        return;
+    }
+
+    text.textContent = `${percentage}%`;
+
+    const circumference = 188.4;
+    const offset = circumference - (
+        circumference * percentage / 100
+    );
+
+    circle.style.strokeDashoffset = offset;
+
+    if (percentage < 80) {
+        circle.style.stroke = "#dc3545";
+    } else if (percentage < 90) {
+        circle.style.stroke = "#ffc107";
+    } else {
+        circle.style.stroke = "#17b932";
     }
 }

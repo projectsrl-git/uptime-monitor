@@ -31,8 +31,20 @@ class MonitorWriteSerializer(serializers.ModelSerializer):
 class MonitorReadSerializer(serializers.ModelSerializer):
 
     status = serializers.ReadOnlyField()
+    last_check_at = serializers.SerializerMethodField()
+    last_response_time_ms = serializers.SerializerMethodField()
 
     class Meta:
         model = Monitor
-
         fields = "__all__"
+
+    def _get_last_check(self, obj):
+        return obj.checks.order_by("-executed_at").first()
+
+    def get_last_check_at(self, obj):
+        last_check = self._get_last_check(obj)
+        return last_check.executed_at if last_check else None
+
+    def get_last_response_time_ms(self, obj):
+        last_check = self._get_last_check(obj)
+        return last_check.response_time_ms if last_check else None

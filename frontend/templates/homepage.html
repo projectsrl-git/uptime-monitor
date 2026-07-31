@@ -17,14 +17,14 @@ Dashboard
     </div>
 
     <div class="row">
-        <!-- Lista monitor -->
+        <!-- lista monitor -->
         <div class="col-lg-8">
             <div id="monitor-list">
                 Caricamento monitor...
             </div>
         </div>
 
-        <!-- Statistiche -->
+        <!-- overview -->
         <div class="col-lg-4">
             <div class="card shadow-sm sticky-top" style="top:20px;">
                 <div class="card-header">
@@ -65,28 +65,64 @@ Dashboard
 </div>
 
 <template id="monitor-card-template">
-    <div class="card mb-2 shadow-sm">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
+    <div class="card mb-1 shadow-sm">
+        <div class="card-body py-1">
+            <div class="row align-items-center">
 
-                <div class="flex-grow-1">
-                    <!-- nome + badge -->
+                <div class="col-4">
+
                     <div class="d-flex align-items-center">
-                        <h5 class="monitor-name me-2 mb-1"></h5>
-                        <span class="badge monitor-status"></span>
-                        <!-- URL -->
-                        <p class="monitor-url text-secondary mb-0 small"></p>
+                        <h5 class="monitor-name me-2 mb-0"></h5>
+
+                        <span class="badge monitor-status me-2"></span>
                     </div>
 
-                    <!-- uptime 2h-->
-                    <p class="monitor-uptime text-muted small mb-0">
-                        Uptime: caricamento...
-                    </p>                
+                    <p class="monitor-response-time text-muted small mb-0 fst-italic mt-2">
+                        caricamento...
+                    </p>
+
                 </div>
 
-                <div class="d-flex align-items-end">
-                    <!-- intervallo -->
-                    <small class="monitor-interval text-muted fst-italic"></small>
+
+                <div class="col-4 d-flex justify-content-center">
+
+                    <div class="uptime-circle-container">
+
+                        <svg class="uptime-circle" width="70" height="70">
+
+                            <circle
+                                class="circle-bg"
+                                cx="35"
+                                cy="35"
+                                r="30">
+                            </circle>
+
+                            <circle
+                                class="circle-progress"
+                                cx="35"
+                                cy="35"
+                                r="30">
+                            </circle>
+
+                        </svg>
+
+                        <div class="uptime-circle-text">
+                            <span class="uptime-percentage">-</span>
+                            <small>24h</small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DESTRA -->
+                <div class="col-4 text-end">
+
+                    <small class="monitor-interval text-muted fst-italic d-block"></small>
+
+                    <small class="monitor-last-check text-muted fst-italic d-block"></small>
+
                 </div>
 
             </div>
