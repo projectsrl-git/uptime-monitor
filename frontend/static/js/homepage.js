@@ -9,6 +9,7 @@ document.addEventListener(
 const searchInput = document.getElementById("search-monitor");
 const orderingSelect = document.getElementById("ordering-monitor");
 const statusFilter = document.getElementById("status-filter");
+const uptimePeriod = document.getElementById("uptime-period");
 
 searchInput.addEventListener("input", function () {
     const query = this.value.toLowerCase();
@@ -28,6 +29,11 @@ orderingSelect.addEventListener(
 );
 
 statusFilter.addEventListener(
+    "change",
+    loadMonitors
+);
+
+uptimePeriod.addEventListener(
     "change",
     loadMonitors
 );
@@ -180,7 +186,7 @@ function formatInterval(seconds) {
 async function loadStats(id, card, monitor) {
     try {
         const response = await fetch(
-            `/api/monitors/${id}/uptime/?period=24h`
+            `/api/monitors/${id}/uptime/?period=${uptimePeriod.value}`
         );
 
         if (!response.ok) {
@@ -246,6 +252,9 @@ function formatLastCheck(dateString) {
 function setUptimeCircle(card, percentage) {
     const circle = card.querySelector(".circle-progress");
     const text = card.querySelector(".uptime-percentage");
+    const periodLabel = card.querySelector(".uptime-period-label");
+
+    periodLabel.textContent = uptimePeriod.value;
 
     if (percentage === null) {
         text.textContent = "N/D";
