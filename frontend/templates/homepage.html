@@ -16,17 +16,36 @@ Dashboard
         </button>
     </div>
 
-    <!-- barra di ricerca -->
-    <div class="row mb-3">
-        <div class="col-lg-8">
-            <div class="input-group">
-                <input
-                    type="text"
-                    id="search-monitor"
-                    class="form-control"
-                    placeholder="Cerca monitor per titolo..."
-                >
-            </div>
+    <div class="row mb-3 align-items-center">
+        <!-- ricerca -->
+        <div class="col-lg-6">
+            <input
+                type="text"
+                id="search-monitor"
+                class="form-control"
+                placeholder="Cerca monitor..."
+            >
+        </div>
+
+        <div class="col-lg-3">
+            <!-- ordinamento -->
+            <select id="ordering-monitor" class="form-select">
+                <option value="name">Nome (A → Z)</option>
+                <option value="-status">Status (DOWN prima)</option>
+                <option value="status">Status (UP prima)</option>
+                <option value="-created_at">Più recenti</option>
+            </select>
+        </div>
+
+        <!-- filtri -->
+        <div class="col-lg-3">
+            <select id="status-filter" class="form-select">
+                <option value="">Tutti gli stati</option>
+                <option value="up">UP</option>
+                <option value="down">DOWN</option>
+                <option value="paused">PAUSED</option>
+                <option value="not_started">NOT STARTED</option>
+            </select>
         </div>
     </div>
 

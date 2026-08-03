@@ -7,6 +7,8 @@ document.addEventListener(
 );
 
 const searchInput = document.getElementById("search-monitor");
+const orderingSelect = document.getElementById("ordering-monitor");
+const statusFilter = document.getElementById("status-filter");
 
 searchInput.addEventListener("input", function () {
     const query = this.value.toLowerCase();
@@ -20,28 +22,44 @@ searchInput.addEventListener("input", function () {
     });
 });
 
+orderingSelect.addEventListener(
+    "change",
+    loadMonitors
+);
+
+statusFilter.addEventListener(
+    "change",
+    loadMonitors
+);
+
 
 async function loadMonitors() {
-    try {
-        const response = await fetch(
-            "/api/monitors/"
-        );
 
-        if (!response.ok) {
-            throw new Error(
-                "Errore nel caricamento dei monitor"
-            );
-        }
+    const params = new URLSearchParams();
 
-        const data = await response.json();
-        const monitors = data.results;
-
-        renderMonitors(monitors);
-        updateStatistics(monitors);
-
-    } catch (error) {
-        console.error(error);
+    if (searchInput.value.trim()) {
+        params.set("search", searchInput.value.trim());
     }
+
+    if (orderingSelect.value) {
+        params.set("ordering", orderingSelect.value);
+    }
+
+    if (statusFilter.value) {
+        params.set("status", statusFilter.value);
+    }
+
+    const response = await fetch(`/api/monitors/?${params}`);
+
+    if (!response.ok) {
+        throw new Error("Errore nel caricamento dei monitor");
+    }
+
+    const data = await response.json();
+    const monitors = data.results;
+
+    renderMonitors(monitors);
+    updateStatistics(monitors);
 }
 
 function renderMonitors(monitors) {
