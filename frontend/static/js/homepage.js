@@ -6,6 +6,20 @@ document.addEventListener(
     }
 );
 
+const searchInput = document.getElementById("search-monitor");
+
+searchInput.addEventListener("input", function () {
+    const query = this.value.toLowerCase();
+
+    document.querySelectorAll("#monitor-list .card").forEach(card => {
+        const title = card.querySelector(".monitor-name")
+            .textContent
+            .toLowerCase();
+
+        card.style.display = title.includes(query) ? "" : "none";
+    });
+});
+
 
 async function loadMonitors() {
     try {
@@ -281,7 +295,7 @@ function renderIncidents(incidents) {
             <div class="d-flex justify-content-between align-items-center">
                 <strong>${incident.monitor_name}</strong>
 
-                <span class="badge ${incident.is_active ? "bg-danger" : "bg-success"
+                <span class="badge rounded-pill ${incident.is_active ? "bg-danger" : "bg-success"
             }">
                     ${incident.is_active ? "ATTIVO" : "RISOLTO"}
                 </span>
