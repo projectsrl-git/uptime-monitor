@@ -249,7 +249,7 @@ async function loadIncidents() {
         const data = await response.json();
 
         renderIncidents(
-            data.slice(0, 5)
+            data.results.slice(0, 5)
         );
 
     } catch (error) {
