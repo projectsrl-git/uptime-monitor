@@ -94,3 +94,12 @@ body {
 .circle-progress.high {
     stroke: #17b932;
 }
+
+.section-title {
+    font-size: 1rem;
+    color: white;
+    background:rgba(255, 255, 255, 0.08);
+    border-left: 4px solid #ffffff;
+    padding: 10px 14px;
+    border-radius: 8px;
+}
