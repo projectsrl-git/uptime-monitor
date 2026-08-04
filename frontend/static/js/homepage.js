@@ -6,10 +6,62 @@ document.addEventListener(
     }
 );
 
+const STATUS_CONFIG = {
+    up: {
+        classes: ["bg-success"],
+        text: "UP"
+    },
+    down: {
+        classes: ["bg-danger"],
+        text: "DOWN"
+    },
+    paused: {
+        classes: ["bg-warning", "text-dark"],
+        text: "PAUSED"
+    },
+    not_started: {
+        classes: ["bg-secondary"],
+        text: "NOT STARTED"
+    }
+};
+
 const searchInput = document.getElementById("search-monitor");
 const orderingSelect = document.getElementById("ordering-monitor");
 const statusFilter = document.getElementById("status-filter");
 const uptimePeriod = document.getElementById("uptime-period");
+
+const statistics = {
+    total: document.getElementById("total-monitors"),
+    up: document.getElementById("up-monitors"),
+    down: document.getElementById("down-monitors"),
+    paused: document.getElementById("paused-monitors"),
+    notStarted: document.getElementById("not-started-monitors")
+};
+
+const elements = {
+    monitorList: document.getElementById("monitor-list"),
+    monitorTemplate: document.getElementById("monitor-card-template"),
+    incidentList: document.getElementById("incident-list"),
+
+    searchInput: document.getElementById("search-monitor"),
+    orderingSelect: document.getElementById("ordering-monitor"),
+    statusFilter: document.getElementById("status-filter"),
+    uptimePeriod: document.getElementById("uptime-period")
+};
+
+async function apiFetch(url) {
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(
+            `Errore API: ${response.status}`
+        );
+    }
+
+    return await response.json();
+}
+
 
 searchInput.addEventListener("input", function () {
     const query = this.value.toLowerCase();
@@ -55,123 +107,91 @@ async function loadMonitors() {
         params.set("status", statusFilter.value);
     }
 
-    const response = await fetch(`/api/monitors/?${params}`);
-
-    if (!response.ok) {
-        throw new Error("Errore nel caricamento dei monitor");
-    }
-
-    const data = await response.json();
+    const data = await apiFetch(
+        `/api/monitors/?${params}`
+    );
+    
     const monitors = data.results;
 
-    renderMonitors(monitors);
+    await renderMonitors(monitors);
     updateStatistics(monitors);
 }
 
-function renderMonitors(monitors) {
-    const container = document.getElementById(
-        "monitor-list"
-    );
-
-    const template = document.getElementById(
-        "monitor-card-template"
-    );
-
+async function renderMonitors(monitors) {
+    const container = elements.monitorList;
+    const template = elements.monitorTemplate;    
     container.innerHTML = "";
+    
+    const fragment = document.createDocumentFragment();
+    const statsPromises = [];
 
     monitors.forEach(monitor => {
+
         const card = template.content.cloneNode(true);
 
         const cardElement = card.querySelector(".card");
 
-        card.querySelector(
-            ".monitor-name"
-        ).textContent = monitor.name;
-
-        card.querySelector(
-            ".monitor-interval"
-        ).textContent = formatInterval(monitor.check_interval_seconds);
-
-        card.querySelector(".monitor-last-check").textContent =
-            formatLastCheck(monitor.last_check_at);
-
+        const name = card.querySelector(".monitor-name");
+        const interval = card.querySelector(".monitor-interval");
+        const lastCheck = card.querySelector(".monitor-last-check");
         const status = card.querySelector(".monitor-status");
+
+        name.textContent = monitor.name;
+        interval.textContent = formatInterval(monitor.check_interval_seconds);
+        lastCheck.textContent = formatLastCheck(monitor.last_check_at);
+
         setStatusBadge(status, monitor.status);
 
-        container.appendChild(card);
+        fragment.appendChild(card);
 
-        loadStats(monitor.id, cardElement, monitor);
+        statsPromises.push(
+            loadStats(monitor.id, cardElement, monitor)
+        );
     });
+
+    container.appendChild(fragment);
+    await Promise.all(statsPromises);
 }
 
+
 function updateStatistics(monitors) {
-    const total = monitors.length;
 
-    const up = monitors.filter(
-        monitor => monitor.status === "up"
-    ).length;
+    const stats = {
+        up: 0,
+        down: 0,
+        paused: 0,
+        not_started: 0
+    };
 
-    const down = monitors.filter(
-        monitor => monitor.status === "down"
-    ).length;
+    for (const monitor of monitors) {
+        if (stats[monitor.status] !== undefined) {
+            stats[monitor.status]++;
+        }
+    }
 
-    const paused = monitors.filter(
-        monitor => monitor.status === "paused"
-    ).length;
+    statistics.total.textContent = monitors.length;
+    statistics.up.textContent = stats.up;
+    statistics.down.textContent = stats.down;
+    statistics.paused.textContent = stats.paused;
+    statistics.notStarted.textContent = stats.not_started;
 
-    const not_started = monitors.filter(
-        monitor => monitor.status === "not_started"
-    ).length;
-
-    document.getElementById(
-        "total-monitors"
-    ).textContent = total;
-
-    document.getElementById(
-        "up-monitors"
-    ).textContent = up;
-
-    document.getElementById(
-        "down-monitors"
-    ).textContent = down;
-
-    document.getElementById(
-        "paused-monitors"
-    ).textContent = paused;
-
-    document.getElementById(
-        "not-started-monitors"
-    ).textContent = not_started;
+    
 }
 
 function setStatusBadge(badge, status) {
+
     badge.className = "badge rounded-pill monitor-status me-2";
 
-    switch (status) {
-        case "up":
-            badge.classList.add("bg-success");
-            badge.textContent = "UP";
-            break;
+    const config = STATUS_CONFIG[status];
 
-        case "down":
-            badge.classList.add("bg-danger");
-            badge.textContent = "DOWN";
-            break;
-
-        case "paused":
-            badge.classList.add("bg-warning", "text-dark");
-            badge.textContent = "PAUSED";
-            break;
-
-        case "not_started":
-            badge.classList.add("bg-secondary");
-            badge.textContent = "NOT STARTED";
-            break;
-
-        default:
-            badge.classList.add("bg-secondary");
-            badge.textContent = status.toUpperCase();
+    if (config) {
+        badge.classList.add(...config.classes);
+        badge.textContent = config.text;
+        return;
     }
+
+    badge.classList.add("bg-secondary");
+    badge.textContent = status.toUpperCase();
 }
 
 function formatInterval(seconds) {
@@ -185,16 +205,10 @@ function formatInterval(seconds) {
 
 async function loadStats(id, card, monitor) {
     try {
-        const response = await fetch(
+        const data = await apiFetch(
             `/api/monitors/${id}/uptime/?period=${uptimePeriod.value}`
         );
-
-        if (!response.ok) {
-            throw new Error("Errore caricamento uptime");
-        }
-
-        const data = await response.json();
-
+        
         setUptimeCircle(
             card,
             data.uptime_percentage
@@ -270,24 +284,32 @@ function setUptimeCircle(card, percentage) {
 
     circle.style.strokeDashoffset = offset;
 
+    circle.classList.remove(
+        "low",
+        "medium",
+        "high"
+    );
+
     if (percentage < 80) {
-        circle.style.stroke = "#dc3545";
+
+        circle.classList.add("low");
+
     } else if (percentage < 90) {
-        circle.style.stroke = "#ffc107";
+
+        circle.classList.add("medium");
+
     } else {
-        circle.style.stroke = "#17b932";
+
+        circle.classList.add("high");
+
     }
 }
 
 async function loadIncidents() {
     try {
-        const response = await fetch("/api/incidents/");
-
-        if (!response.ok) {
-            throw new Error("Errore caricamento incidenti");
-        }
-
-        const data = await response.json();
+        const data = await apiFetch(
+            "/api/incidents/"
+        );
 
         renderIncidents(
             data.results.slice(0, 5)
@@ -300,7 +322,7 @@ async function loadIncidents() {
 
 function renderIncidents(incidents) {
 
-    const container = document.getElementById("incident-list");
+    const container = elements.incidentList;
     container.innerHTML = "";
 
     if (incidents.length === 0) {
@@ -309,6 +331,8 @@ function renderIncidents(incidents) {
         return;
     }
 
+    let html = "";
+
     incidents.forEach((incident, index) => {
 
         const borderClass =
@@ -316,16 +340,22 @@ function renderIncidents(incidents) {
                 ? "border-bottom"
                 : "";
 
-        container.innerHTML += `
+        html += `
         <div class="${borderClass} py-2">
 
             <div class="d-flex justify-content-between align-items-center">
                 <strong>${incident.monitor_name}</strong>
 
-                <span class="badge rounded-pill ${incident.is_active ? "bg-danger" : "bg-success"
+                <span class="badge rounded-pill ${incident.is_active
+                ? "bg-danger"
+                : "bg-success"
             }">
-                    ${incident.is_active ? "ATTIVO" : "RISOLTO"}
+                    ${incident.is_active
+                ? "ATTIVO"
+                : "RISOLTO"
+            }
                 </span>
+
             </div>
 
             <small class="text-muted">
@@ -335,4 +365,6 @@ function renderIncidents(incidents) {
         </div>
     `;
     });
+
+    container.innerHTML = html;
 }

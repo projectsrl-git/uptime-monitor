@@ -82,3 +82,15 @@ body {
     font-size: 9px;
     margin-top: 2px;
 }
+
+.circle-progress.low {
+    stroke: #dc3545;
+}
+
+.circle-progress.medium {
+    stroke: #ffc107;
+}
+
+.circle-progress.high {
+    stroke: #17b932;
+}
