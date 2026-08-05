@@ -311,7 +311,7 @@ async function loadIncidents() {
             "/api/incidents/"
         );
 
-        const incidents = data;
+        const incidents = data.results;
 
         renderIncidents(
             incidents.slice(0, 5)
