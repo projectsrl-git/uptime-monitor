@@ -2,9 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
     loadIncidents();
 });
 
-async function loadIncidents() {
+async function loadIncidents(page = 1) {
 
-    const response = await fetch("/api/incidents/");
+    const response = await fetch(`/api/incidents/?page=${page}`);
     const data = await response.json();
 
     const tbody = document.getElementById("incident-table-body");
@@ -58,6 +58,7 @@ async function loadIncidents() {
         `;
     });
 
+    renderPagination(data);
 }
 
 function formatDate(date) {
@@ -102,4 +103,44 @@ function formatDuration(seconds, startedAt) {
     if (secs && parts.length < 2) parts.push(`${secs}s`);
 
     return parts.join(" ") || "0s";
+}
+
+function renderPagination(data) {
+
+    const pagination = document.getElementById("pagination");
+
+    let html = `
+    <ul class="pagination">
+    `;
+
+    html += `
+        <li class="page-item ${!data.previous ? "disabled" : ""}">
+            <button class="page-link" onclick="loadIncidents(${data.page - 1})">
+                &laquo;
+            </button>
+        </li>
+    `;
+
+    for (let i = 1; i <= data.num_pages; i++) {
+
+        html += `
+        <li class="page-item ${i === data.page ? "active" : ""}">
+            <button class="page-link" onclick="loadIncidents(${i})">
+                ${i}
+            </button>
+        </li>
+        `;
+    }
+
+    html += `
+        <li class="page-item ${!data.next ? "disabled" : ""}">
+            <button class="page-link" onclick="loadIncidents(${data.page + 1})">
+                &raquo;
+            </button>
+        </li>
+    `;
+
+    html += "</ul>";
+
+    pagination.innerHTML = html;
 }

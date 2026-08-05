@@ -145,3 +145,47 @@ body {
 .badge {
     font-weight: 500;
 }
+
+/****************/
+/* PAGINATION   */
+/****************/
+
+.pagination {
+    margin-bottom: 0;
+}
+
+.pagination .page-item .page-link {
+    background-color: #2b3035;
+    color: #adb5bd;
+    border-color: #495057;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: #343a40;
+    color: white;
+    border-color: #adb5bd;
+    z-index: 2;
+}
+
+.pagination .page-item.active .page-link {
+    color: white;
+    font-weight: 600;
+    z-index: 3;
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: #212529;
+    color: #6c757d;
+    border-color: #495057;
+}
+
+
+.pagination .page-link:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.pagination .page-item:not(:first-child) .page-link {
+    margin-left: 1px;
+}
