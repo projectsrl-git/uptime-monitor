@@ -12,29 +12,20 @@
                     </a>
                 </li>
 
-
                 <li class="nav-item">
-                    <a
-                        class="nav-link px-3 rounded-pill {% if request.path|slice:':10' == '/incidents/' %}active{% endif %}"
-                        href="/incidents/"
-                    >
+                    <a class="nav-link px-3 rounded-pill {% if request.path|slice:':11' == '/incidents/' %}active{% endif %}"
+                        href="/incidents/">
                         Incidents
                     </a>
                 </li>
 
-
                 <li class="nav-item">
-                    <a
-                        class="nav-link px-3 rounded-pill {% if request.path|slice:':10' == '/settings/' %}active{% endif %}"
-                        href="#"
-                    >
+                    <a class="nav-link px-3 rounded-pill {% if request.path|slice:':10' == '/settings/' %}active{% endif %}"
+                        href="#">
                         Settings
                     </a>
                 </li>
-
             </ul>
-
         </div>
-
     </div>
 </nav>

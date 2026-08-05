@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 
+from incident.models import Incident
 from monitor.models import Monitor
 from monitor.serializer import MonitorWriteSerializer
 
@@ -55,3 +56,16 @@ def prepare_monitor_data(data):
         data["slow_response_threshold_ms"] = None
 
     return data
+
+
+def incidents_page(request):
+
+    incidents = Incident.objects.all()
+
+    return render(
+        request,
+        "incidents.html",
+        {
+            "incidents": incidents,
+        },
+    )

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Incidenti
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Incidenti</h1>
+    </div>
+
+    <div class="card shadow-sm border-0">
+
+        <div class="table-responsive">
+
+            <div class="card-body p-0">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead>
+                        <tr>
+                            <th>Stato</th>
+                            <th>Monitor</th>
+                            <th>Causa</th>
+                            <th>Inizio</th>
+                            <th>Fine</th>
+                            <th>Durata</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="incident-table-body"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/incidents.js' %}"></script>
+{% endblock %}
