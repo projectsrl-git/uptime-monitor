@@ -1,18 +1,21 @@
+/**********/
+/* GLOBAL */
+/**********/
+
+html,
 body {
+    height: 100%;
     background-color: #212529;
 }
 
-.card {
-    background-color: #2b3035;
-    border: 1px solid #495057;
-    transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+body.dashboard-page {
+    overflow: hidden;
 }
 
-.card:hover {
-    background-color: #343a40;
-    border-color: #adb5bd;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
-}
+
+/**********/
+/* NAVBAR */
+/**********/
 
 .navbar-brand {
     font-size: 1.25rem;
@@ -30,6 +33,40 @@ body {
     font-weight: 600;
 }
 
+
+/*********/
+/* CARDS */
+/*********/
+
+.card {
+    background-color: #2b3035;
+    border: 1px solid #495057;
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        box-shadow .15s ease;
+}
+
+.card-body.py-1:hover {
+    background-color: #343a40;
+    border-color: #adb5bd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
+}
+
+
+/**********/
+/* BADGES */
+/**********/
+
+.badge {
+    font-weight: 500;
+}
+
+
+/**********/
+/* COLORS */
+/**********/
+
 .bg-success {
     background-color: #17b932 !important;
 }
@@ -37,6 +74,44 @@ body {
 .text-success {
     color: #17b932 !important;
 }
+
+
+/*************/
+/* DASHBOARD */
+/*************/
+
+.dashboard-container {
+    height: calc(100vh - 56px);
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-container > .container {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.dashboard-content {
+    flex: 1;
+    min-height: 0;
+}
+
+.dashboard-content>div {
+    height: 100%;
+}
+
+.monitor-scroll {
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+
+/*****************/
+/* UPTIME CIRCLE */
+/*****************/
 
 .uptime-circle-container {
     position: relative;
@@ -58,7 +133,6 @@ body {
     fill: none;
     stroke: #17b932;
     stroke-width: 8;
-
     stroke-linecap: butt;
 
     stroke-dasharray: 188.4;
@@ -102,18 +176,23 @@ body {
     stroke: #17b932;
 }
 
-/***************/
-/* ADD_MONITOR */
-/***************/
+
+/****************/
+/* ADD MONITOR  */
+/****************/
 
 .section-title {
     font-size: 1rem;
     color: white;
-    background:rgba(255, 255, 255, 0.08);
+
+    background: rgba(255, 255, 255, 0.08);
+
     border-left: 4px solid #ffffff;
+
     padding: 10px 14px;
     border-radius: 8px;
 }
+
 
 /*************/
 /* INCIDENTS */
@@ -126,9 +205,12 @@ body {
 .table thead th {
     background: var(--bs-secondary-bg);
     color: var(--bs-secondary-color);
+
     border-bottom: 2px solid var(--bs-border-color);
+
     font-size: .8rem;
     font-weight: 600;
+
     text-transform: uppercase;
     letter-spacing: .05em;
 }
@@ -142,13 +224,10 @@ body {
     background-color: var(--bs-tertiary-bg);
 }
 
-.badge {
-    font-weight: 500;
-}
 
-/****************/
-/* PAGINATION   */
-/****************/
+/**************/
+/* PAGINATION */
+/**************/
 
 .pagination {
     margin-bottom: 0;
@@ -156,30 +235,42 @@ body {
 
 .pagination .page-item .page-link {
     background-color: #2b3035;
+
     color: #adb5bd;
+
     border-color: #495057;
-    transition: background-color .15s ease, border-color .15s ease;
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease;
 }
 
 .pagination .page-item .page-link:hover {
     background-color: #343a40;
+
     color: white;
+
     border-color: #adb5bd;
+
     z-index: 2;
 }
 
 .pagination .page-item.active .page-link {
+
     color: white;
+
     font-weight: 600;
+
     z-index: 3;
 }
 
 .pagination .page-item.disabled .page-link {
     background-color: #212529;
+
     color: #6c757d;
+
     border-color: #495057;
 }
-
 
 .pagination .page-link:focus {
     box-shadow: none;

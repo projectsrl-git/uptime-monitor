@@ -13,7 +13,6 @@ from incident.serializer import IncidentSerializer
 from .serializer import MonitorReadSerializer, MonitorWriteSerializer
 from .services.period_service import get_period_range, parse_date
 from .services.uptime_service import calculate_uptime
-from .pagination import StandardResultsSetPagination
 
 VALID_STATUS = (
     "up",
@@ -36,8 +35,6 @@ class MonitorViewSet(viewsets.ModelViewSet):
     ordering = [
         "name",
     ]
-
-    pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
 

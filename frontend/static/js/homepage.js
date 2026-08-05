@@ -111,7 +111,7 @@ async function loadMonitors() {
         `/api/monitors/?${params}`
     );
     
-    const monitors = data.results;
+    const monitors = data;
 
     await renderMonitors(monitors);
     updateStatistics(monitors);
@@ -311,8 +311,10 @@ async function loadIncidents() {
             "/api/incidents/"
         );
 
+        const incidents = data;
+
         renderIncidents(
-            data.results.slice(0, 5)
+            incidents.slice(0, 5)
         );
 
     } catch (error) {
