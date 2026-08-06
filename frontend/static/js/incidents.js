@@ -59,7 +59,7 @@ async function loadIncidents(page = 1) {
             : `<span class="badge rounded-pill bg-success">RISOLTO</span>`;
 
         tbody.innerHTML += `
-        <tr>
+        <tr onclick="window.location.href='/incidents/${incident.id}/'">
 
             <td>
                 ${status}

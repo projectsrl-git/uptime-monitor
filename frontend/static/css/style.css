@@ -51,6 +51,7 @@ body.dashboard-page {
     background-color: #343a40;
     border-color: #adb5bd;
     box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
+    cursor: pointer;
 }
 
 
@@ -222,6 +223,7 @@ body.dashboard-page {
 
 .table-hover tbody tr:hover {
     background-color: var(--bs-tertiary-bg);
+    cursor: pointer;
 }
 
 

@@ -69,3 +69,9 @@ def incidents_page(request):
             "incidents": incidents,
         },
     )
+
+
+def incident_detail(request, id):
+    incident = Incident.objects.get(id=id)
+
+    return render(request, "incident_detail.html", {"incident": incident})

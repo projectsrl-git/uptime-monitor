@@ -13,6 +13,7 @@ from incident.serializer import IncidentSerializer
 from .serializer import MonitorReadSerializer, MonitorWriteSerializer
 from .services.period_service import get_period_range, parse_date
 from .services.uptime_service import calculate_uptime
+from rest_framework.pagination import PageNumberPagination
 
 VALID_STATUS = (
     "up",
@@ -20,6 +21,12 @@ VALID_STATUS = (
     "paused",
     "not_started",
 )
+
+
+class HistoryPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = "page_size"
+    max_page_size = 100
 
 
 class MonitorViewSet(viewsets.ModelViewSet):
@@ -225,7 +232,7 @@ class MonitorCheckHistoryView(APIView):
                 executed_at__lte=to_date,
             )
 
-        paginator = StandardResultsSetPagination()
+        paginator = HistoryPagination()
 
         page = paginator.paginate_queryset(
             checks,
@@ -283,7 +290,7 @@ class MonitorIncidentHistoryView(APIView):
                 started_at__lte=to_date,
             )
 
-        paginator = StandardResultsSetPagination()
+        paginator = HistoryPagination()
 
         page = paginator.paginate_queryset(
             incidents,
