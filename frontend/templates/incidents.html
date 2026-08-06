@@ -12,6 +12,38 @@ Incidenti
         <h1>Incidenti</h1>
     </div>
 
+    {% comment %} prova {% endcomment %}
+    <div class="row mb-3 align-items-center">
+
+        <!-- ricerca -->
+        <div class="col-lg-5">
+            <input
+                type="text"
+                id="search-incident"
+                class="form-control"
+                placeholder="Cerca monitor..."
+            >
+        </div>
+
+        <!-- ordinamento -->
+        <div class="col-lg-4">
+            <select id="ordering-incident" class="form-select">
+                <option value="-started_at">Più recenti</option>
+                <option value="started_at">Più vecchi</option>
+            </select>
+        </div>
+
+        <!-- filtro -->
+        <div class="col-lg-3">
+            <select id="status-filter" class="form-select">
+                <option value="">Tutti</option>
+                <option value="active">Attivi</option>
+                <option value="resolved">Risolti</option>
+            </select>
+        </div>
+
+    </div>
+    
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
             <div class="card-body p-0">

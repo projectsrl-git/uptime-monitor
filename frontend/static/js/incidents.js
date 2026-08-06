@@ -2,9 +2,42 @@ document.addEventListener("DOMContentLoaded", () => {
     loadIncidents();
 });
 
+const searchInput = document.getElementById("search-incident");
+const orderingSelect = document.getElementById("ordering-incident");
+const statusFilter = document.getElementById("status-filter");
+
+searchInput.addEventListener("input", () => {
+    loadIncidents();
+});
+
+orderingSelect.addEventListener("change", () => {
+    loadIncidents();
+});
+
+statusFilter.addEventListener("change", () => {
+    loadIncidents();
+});
+
+
 async function loadIncidents(page = 1) {
 
-    const response = await fetch(`/api/incidents/?page=${page}`);
+    const params = new URLSearchParams();
+
+    params.set("page", page);
+
+    if (searchInput.value.trim()) {
+        params.set("search", searchInput.value.trim());
+    }
+
+    if (orderingSelect.value) {
+        params.set("ordering", orderingSelect.value);
+    }
+
+    if (statusFilter.value) {
+        params.set("status", statusFilter.value);
+    }
+
+    const response = await fetch(`/api/incidents/?${params}`);
     const data = await response.json();
 
     const tbody = document.getElementById("incident-table-body");
