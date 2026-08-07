@@ -31,6 +31,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = True
+
 
 # Application definition
 
@@ -44,6 +52,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "monitor",
+    "check",
+    "incident",
+    "notification",
+    "frontend",
 ]
 
 MIDDLEWARE = [
@@ -125,4 +137,4 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "frontend/static/"
