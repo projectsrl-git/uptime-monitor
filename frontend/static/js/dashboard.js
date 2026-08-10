@@ -455,12 +455,41 @@ async function loadGeneralStatistics() {
             `/api/statistics/?period=${statisticsPeriod}`
         );
 
-        document.getElementById(
-            "stats-uptime"
-        ).textContent =
-            data.uptime_percentage !== null
-                ? `${data.uptime_percentage.toFixed(2)}%`
-                : "N/D";
+        const uptimeElement =
+            document.getElementById("stats-uptime");
+
+        uptimeElement.classList.remove(
+            "low",
+            "medium",
+            "high"
+        );
+
+        if (data.uptime_percentage === null) {
+
+            uptimeElement.textContent = "N/D";
+
+        } else {
+
+            const percentage =
+                data.uptime_percentage;
+
+            uptimeElement.textContent =
+                `${percentage.toFixed(2)}%`;
+
+            if (percentage < 80) {
+
+                uptimeElement.classList.add("low");
+
+            } else if (percentage < 90) {
+
+                uptimeElement.classList.add("medium");
+
+            } else {
+
+                uptimeElement.classList.add("high");
+
+            }
+        }
 
         document.getElementById(
             "stats-response"
@@ -490,9 +519,16 @@ async function loadGeneralStatistics() {
 
         console.error(error);
 
-        document.getElementById(
-            "stats-uptime"
-        ).textContent = "N/D";
+        const uptimeElement =
+            document.getElementById("stats-uptime");
+
+        uptimeElement.classList.remove(
+            "low",
+            "medium",
+            "high"
+        );
+
+        uptimeElement.textContent = "N/D";
 
         document.getElementById(
             "stats-response"
