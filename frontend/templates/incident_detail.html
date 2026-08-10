@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Incidente #{{ incident.id }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1">
+                Incidente #{{ incident.id }}
+            </h1>
+
+            <div class="text-muted">
+                {{ incident.monitor_name }}
+            </div>
+        </div>
+
+        <a href="{% url 'incidents' %}"
+           class="btn btn-outline-secondary rounded-pill">
+            Lista incidenti
+        </a>
+    </div>
+
+<!-- sommario -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                Sommario
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-4 border-end">
+                    <div class="text-muted small">
+                        Stato
+                    </div>
+
+                    <div class="fw-semibold mt-1">
+                        {% if incident.is_active %}
+                            <span class="badge bg-danger rounded-pill px-3 py-2 fw-bold">
+                                Attivo
+                            </span>
+                        {% else %}
+                            <span class="badge bg-success rounded-pill px-3 py-2 fw-bold">
+                                Risolto
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+
+                <div class="col-md-4 border-end">
+                    <div class="text-muted small">
+                        Root cause
+                    </div>
+
+                    <div class="fw-semibold mt-1">
+                        <span class="badge text-bg-warning rounded-pill px-3 py-2">
+                            {{ incident.root_cause }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-muted small">
+                        Monitor
+                    </div>
+
+                    <h5 class="text-muted">
+                        {{ incident.monitor }}
+                    </h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- timeline -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                Timeline
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-4 border-end">
+                    <div class="text-muted small">
+                        Inizio incidente
+                    </div>
+                    <div class="fw-semibold"
+                        data-date="{{ incident.started_at|date:'c' }}">
+                        {{ incident.started_at }}
+                    </div>
+                </div>
+
+                <div class="col-md-4 border-end">
+                    <div class="text-muted small">
+                        Fine incidente
+                    </div>
+
+                    <div class="fw-semibold">
+                        {% if incident.ended_at %}
+                            <span data-date="{{ incident.ended_at|date:'c' }}">
+                                {{ incident.ended_at }}
+                            </span>
+
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-muted small">
+                        Durata
+                    </div>
+
+                    <div class="fw-semibold mt-1"
+                        id="incident-duration"
+                        data-duration="{{ incident.duration_seconds|default:'' }}"
+                        data-started="{{ incident.started_at|date:'c' }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/incident_detail.js' %}"></script>
+{% endblock %}

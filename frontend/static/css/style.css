@@ -1,0 +1,320 @@
+/**********/
+/* GLOBAL */
+/**********/
+
+html,
+body {
+    height: 100%;
+    background-color: #212529;
+}
+
+body.dashboard-page {
+    overflow: hidden;
+}
+
+
+/**********/
+/* NAVBAR */
+/**********/
+
+.navbar-brand {
+    font-size: 1.25rem;
+}
+
+.nav-link {
+    transition: background-color .15s ease;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.nav-link.active {
+    font-weight: 600;
+}
+
+
+/*********/
+/* CARDS */
+/*********/
+
+.card {
+    background-color: #2b3035;
+    border: 1px solid #495057;
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        box-shadow .15s ease;
+}
+
+.card-body.py-1:hover {
+    background-color: #343a40;
+    border-color: #adb5bd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
+    cursor: pointer;
+}
+
+
+/**********/
+/* BADGES */
+/**********/
+
+.badge {
+    font-weight: 500;
+}
+
+
+/**********/
+/* COLORS */
+/**********/
+
+.bg-success {
+    background-color: #17b932 !important;
+}
+
+.text-success {
+    color: #17b932 !important;
+}
+
+
+/*************/
+/* DASHBOARD */
+/*************/
+
+.dashboard-container {
+    height: calc(100vh - 56px);
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-container > .container {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.dashboard-content {
+    flex: 1;
+    min-height: 0;
+}
+
+.dashboard-content>div {
+    height: 100%;
+}
+
+.monitor-scroll {
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+
+/*****************/
+/* UPTIME CIRCLE */
+/*****************/
+
+.uptime-circle-container {
+    position: relative;
+    width: 70px;
+    height: 70px;
+}
+
+.uptime-circle {
+    transform: rotate(-90deg);
+}
+
+.circle-bg {
+    fill: none;
+    stroke: #e9ecef;
+    stroke-width: 8;
+}
+
+.circle-progress {
+    fill: none;
+    stroke: #17b932;
+    stroke-width: 8;
+    stroke-linecap: butt;
+
+    stroke-dasharray: 188.4;
+    stroke-dashoffset: 188.4;
+
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.uptime-circle-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    text-align: center;
+    line-height: 1;
+}
+
+.uptime-circle-text span {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.uptime-circle-text small {
+    display: block;
+    font-size: 9px;
+    margin-top: 2px;
+}
+
+.circle-progress.low {
+    stroke: #dc3545;
+}
+
+.circle-progress.medium {
+    stroke: #ffc107;
+}
+
+.circle-progress.high {
+    stroke: #17b932;
+}
+
+
+/****************/
+/* ADD MONITOR  */
+/****************/
+
+.section-title {
+    font-size: 1rem;
+    color: white;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    border-left: 4px solid #ffffff;
+
+    padding: 10px 14px;
+    border-radius: 8px;
+}
+
+
+/*************/
+/* INCIDENTS */
+/*************/
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background: var(--bs-secondary-bg);
+    color: var(--bs-secondary-color);
+
+    border-bottom: 2px solid var(--bs-border-color);
+
+    font-size: .8rem;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.table tbody td {
+    padding: 1rem .75rem;
+    border-color: var(--bs-border-color);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--bs-tertiary-bg);
+    cursor: pointer;
+}
+
+
+/**************/
+/* PAGINATION */
+/**************/
+
+.pagination {
+    margin-bottom: 0;
+}
+
+.pagination .page-item .page-link {
+    background-color: #2b3035;
+
+    color: #adb5bd;
+
+    border-color: #495057;
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease;
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: #343a40;
+
+    color: white;
+
+    border-color: #adb5bd;
+
+    z-index: 2;
+}
+
+.pagination .page-item.active .page-link {
+
+    color: white;
+
+    font-weight: 600;
+
+    z-index: 3;
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: #212529;
+
+    color: #6c757d;
+
+    border-color: #495057;
+}
+
+.pagination .page-link:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.pagination .page-item:not(:first-child) .page-link {
+    margin-left: 1px;
+}
+
+
+/**********************/
+/* STATISTICS BUTTONS */
+/**********************/
+
+.stats-period .btn {
+    background-color: #212529;
+    color: #adb5bd;
+    border-color: #495057;
+    transition:
+        background-color .15s ease,
+        border-color .15s ease;
+}
+
+.stats-period .btn:hover {
+    background-color: #343a40;
+    color: white;
+    border-color: #adb5bd;
+}
+
+.stats-period .btn.active {
+    color: white;
+    font-weight: 600;
+    background-color: #343a40;
+    border-color: #adb5bd;
+}
+
+.stats-period .btn:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.stats-period .btn:not(:first-child) {
+    margin-left: 1px;
+}
