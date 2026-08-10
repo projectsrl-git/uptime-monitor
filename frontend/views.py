@@ -10,7 +10,7 @@ def home(request):
 
     return render(
         request,
-        "homepage.html",
+        "dashboard.html",
         {
             "monitors": monitors,
         },

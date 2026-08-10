@@ -282,3 +282,39 @@ body.dashboard-page {
 .pagination .page-item:not(:first-child) .page-link {
     margin-left: 1px;
 }
+
+
+/**********************/
+/* STATISTICS BUTTONS */
+/**********************/
+
+.stats-period .btn {
+    background-color: #212529;
+    color: #adb5bd;
+    border-color: #495057;
+    transition:
+        background-color .15s ease,
+        border-color .15s ease;
+}
+
+.stats-period .btn:hover {
+    background-color: #343a40;
+    color: white;
+    border-color: #adb5bd;
+}
+
+.stats-period .btn.active {
+    color: white;
+    font-weight: 600;
+    background-color: #343a40;
+    border-color: #adb5bd;
+}
+
+.stats-period .btn:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.stats-period .btn:not(:first-child) {
+    margin-left: 1px;
+}

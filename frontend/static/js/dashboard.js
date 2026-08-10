@@ -1,8 +1,10 @@
 document.addEventListener(
     "DOMContentLoaded",
     () => {
+
         loadMonitors();
         loadIncidents();
+        loadGeneralStatistics();
     }
 );
 
@@ -29,6 +31,29 @@ const searchInput = document.getElementById("search-monitor");
 const orderingSelect = document.getElementById("ordering-monitor");
 const statusFilter = document.getElementById("status-filter");
 const uptimePeriod = document.getElementById("uptime-period");
+let statisticsPeriod = "24h";
+
+document
+    .querySelectorAll(".stats-period button")
+    .forEach(button => {
+
+        button.addEventListener("click", async () => {
+
+            document
+                .querySelectorAll(".stats-period button")
+                .forEach(btn => {
+                    btn.classList.remove("active");
+                });
+
+            button.classList.add("active");
+
+            statisticsPeriod =
+                button.dataset.period;
+
+            await loadGeneralStatistics();
+        });
+
+    });
 
 const statistics = {
     total: document.getElementById("total-monitors"),
@@ -110,7 +135,7 @@ async function loadMonitors() {
     const data = await apiFetch(
         `/api/monitors/?${params}`
     );
-    
+
     const monitors = data;
 
     await renderMonitors(monitors);
@@ -119,9 +144,9 @@ async function loadMonitors() {
 
 async function renderMonitors(monitors) {
     const container = elements.monitorList;
-    const template = elements.monitorTemplate;    
+    const template = elements.monitorTemplate;
     container.innerHTML = "";
-    
+
     const fragment = document.createDocumentFragment();
     const statsPromises = [];
 
@@ -151,6 +176,7 @@ async function renderMonitors(monitors) {
 
     container.appendChild(fragment);
     await Promise.all(statsPromises);
+
 }
 
 
@@ -175,7 +201,7 @@ function updateStatistics(monitors) {
     statistics.paused.textContent = stats.paused;
     statistics.notStarted.textContent = stats.not_started;
 
-    
+
 }
 
 function setStatusBadge(badge, status) {
@@ -204,32 +230,44 @@ function formatInterval(seconds) {
 }
 
 async function loadStats(id, card, monitor) {
+
     try {
+
         const data = await apiFetch(
             `/api/monitors/${id}/uptime/?period=${uptimePeriod.value}`
         );
-        
+
         setUptimeCircle(
             card,
             data.uptime_percentage
         );
 
-        const responseTime = monitor.last_response_time_ms !== null
-            ? `${monitor.last_response_time_ms}ms`
-            : "N/D";
+        const responseTime =
+            monitor.last_response_time_ms !== null
+                ? `${monitor.last_response_time_ms}ms`
+                : "N/D";
 
         card.querySelector(
             ".monitor-response-time"
         ).textContent =
             `ultima risposta: ${responseTime}`;
 
+        return {
+            uptime: data.uptime_percentage
+        };
+
     } catch (error) {
+
         console.error(error);
 
         card.querySelector(
-            ".monitor-stats"
+            ".monitor-response-time"
         ).textContent =
             "ultima risposta: N/D";
+
+        return {
+            uptime: null
+        };
     }
 }
 
@@ -261,6 +299,42 @@ function formatLastCheck(dateString) {
 
     const days = Math.floor(hours / 24);
     return `ultimo check: ${days}g`;
+}
+
+function formatDuration(seconds) {
+
+    if (seconds == null) {
+        return "-";
+    }
+
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor(
+        (seconds % 86400) / 3600
+    );
+    const minutes = Math.floor(
+        (seconds % 3600) / 60
+    );
+    const secs = seconds % 60;
+
+    const parts = [];
+
+    if (days) {
+        parts.push(`${days}d`);
+    }
+
+    if (hours) {
+        parts.push(`${hours}h`);
+    }
+
+    if (minutes) {
+        parts.push(`${minutes}m`);
+    }
+
+    if (secs && parts.length < 2) {
+        parts.push(`${secs}s`);
+    }
+
+    return parts.join(" ") || "0s";
 }
 
 function setUptimeCircle(card, percentage) {
@@ -306,19 +380,21 @@ function setUptimeCircle(card, percentage) {
 }
 
 async function loadIncidents() {
+
     try {
+
         const data = await apiFetch(
             "/api/incidents/"
         );
 
-        const incidents = data.results;
-
         renderIncidents(
-            incidents.slice(0, 5)
+            data.results.slice(0, 5)
         );
 
     } catch (error) {
+
         console.error(error);
+
     }
 }
 
@@ -369,4 +445,69 @@ function renderIncidents(incidents) {
     });
 
     container.innerHTML = html;
+}
+
+async function loadGeneralStatistics() {
+
+    try {
+
+        const data = await apiFetch(
+            `/api/statistics/?period=${statisticsPeriod}`
+        );
+
+        document.getElementById(
+            "stats-uptime"
+        ).textContent =
+            data.uptime_percentage !== null
+                ? `${data.uptime_percentage.toFixed(2)}%`
+                : "N/D";
+
+        document.getElementById(
+            "stats-response"
+        ).textContent =
+            data.response_time_average_ms !== null
+                ? `${Math.round(data.response_time_average_ms)} ms`
+                : "N/D";
+
+        document.getElementById(
+            "stats-checks"
+        ).textContent =
+            data.checks.toLocaleString("it-IT");
+
+        document.getElementById(
+            "stats-incidents"
+        ).textContent =
+            data.incidents;
+
+        document.getElementById(
+            "stats-downtime"
+        ).textContent =
+            formatDuration(
+                data.downtime_seconds
+            );
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById(
+            "stats-uptime"
+        ).textContent = "N/D";
+
+        document.getElementById(
+            "stats-response"
+        ).textContent = "N/D";
+
+        document.getElementById(
+            "stats-checks"
+        ).textContent = "N/D";
+
+        document.getElementById(
+            "stats-incidents"
+        ).textContent = "N/D";
+
+        document.getElementById(
+            "stats-downtime"
+        ).textContent = "N/D";
+    }
 }
