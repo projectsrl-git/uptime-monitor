@@ -240,21 +240,22 @@ Dashboard
         <div class="card mb-1 shadow-sm">
             <div class="card-body py-1">
                 <div class="row align-items-center">
+
+                    <!-- nome + stato + ultima risposta -->
                     <div class="col-4">
                         <div class="d-flex align-items-center">
-                            <!-- nome -->
                             <h5 class="monitor-name me-2 mb-0"></h5>
-                            <!-- badge -->
                             <span class="badge monitor-status me-2"></span>
                         </div>
-                            <!-- ultima risposta -->
+
                         <p class="monitor-response-time text-muted small mb-0 fst-italic mt-2">
                             caricamento...
                         </p>
                     </div>
 
+
                     <!-- cerchio uptime -->
-                    <div class="col-4 d-flex justify-content-center">
+                    <div class="col-1 d-flex justify-content-center">
                         <div class="uptime-circle-container">
                             <svg class="uptime-circle" width="70" height="70">
                                 <circle
@@ -279,12 +280,21 @@ Dashboard
                         </div>
                     </div>
 
-                    <div class="col-4 text-end">
-                        <!-- intervallo check -->
+
+                    <!-- badge personalizzati -->
+                    <div class="col-4">
+                        <div class="monitor-badges d-flex flex-wrap justify-content-center align-content-start gap-1">
+                        </div>
+                    </div>
+
+
+                    <!-- statistiche -->
+                    <div class="col-3 text-end">
                         <small class="monitor-interval text-muted fst-italic d-block"></small>
-                        <!-- ultimo check -->
+
                         <small class="monitor-last-check text-muted fst-italic d-block"></small>
                     </div>
+
                 </div>
             </div>
         </div>

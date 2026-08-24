@@ -89,14 +89,30 @@ async function apiFetch(url) {
 
 
 searchInput.addEventListener("input", function () {
-    const query = this.value.toLowerCase();
+
+    const query = this.value.trim().toLowerCase();
 
     document.querySelectorAll("#monitor-list .card").forEach(card => {
-        const title = card.querySelector(".monitor-name")
-            .textContent
-            .toLowerCase();
 
-        card.style.display = title.includes(query) ? "" : "none";
+        const name =
+            card.querySelector(".monitor-name")
+                .textContent
+                .toLowerCase();
+
+        const badgesElement =
+            card.querySelector(".monitor-badges");
+
+        const badges =
+            badgesElement
+                ? badgesElement.textContent.toLowerCase()
+                : "";
+
+        const matches =
+            name.includes(query) ||
+            badges.includes(query);
+
+        card.style.display =
+            matches ? "" : "none";
     });
 });
 
@@ -145,6 +161,7 @@ async function loadMonitors() {
 async function renderMonitors(monitors) {
     const container = elements.monitorList;
     const template = elements.monitorTemplate;
+
     container.innerHTML = "";
 
     const fragment = document.createDocumentFragment();
@@ -156,22 +173,46 @@ async function renderMonitors(monitors) {
 
         const cardElement = card.querySelector(".card");
 
+        cardElement.addEventListener("click", () => {
+            window.location.href = `/monitor/${monitor.id}/`;
+        });
+
         const name = card.querySelector(".monitor-name");
         const interval = card.querySelector(".monitor-interval");
         const lastCheck = card.querySelector(".monitor-last-check");
         const status = card.querySelector(".monitor-status");
+        const badges = card.querySelector(".monitor-badges");
 
         name.textContent = monitor.name;
-        interval.textContent = formatInterval(monitor.check_interval_seconds);
-        lastCheck.textContent = formatLastCheck(monitor.last_check_at);
+
+        interval.textContent =
+            formatInterval(monitor.check_interval_seconds);
+
+        lastCheck.textContent =
+            formatLastCheck(monitor.last_check_at);
 
         setStatusBadge(status, monitor.status);
 
-        cardElement.style.cursor = "pointer";
+        if (badges) {
 
-        cardElement.addEventListener("click", () => {
-            window.location.href = `/monitor/${monitor.id}/`;
-        });
+            badges.innerHTML = "";
+
+            if (monitor.badges && monitor.badges.length > 0) {
+
+                monitor.badges.forEach(badge => {
+
+                    const badgeElement =
+                        document.createElement("span");
+
+                    badgeElement.className =
+                        "badge rounded-pill text-bg-primary monitor-custom-badge";
+
+                    badgeElement.textContent = badge;
+
+                    badges.appendChild(badgeElement);
+                });
+            }
+        }
 
         fragment.appendChild(card);
 
@@ -181,10 +222,9 @@ async function renderMonitors(monitors) {
     });
 
     container.appendChild(fragment);
+
     await Promise.all(statsPromises);
-
 }
-
 
 function updateStatistics(monitors) {
 
