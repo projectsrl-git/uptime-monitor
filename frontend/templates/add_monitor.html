@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nuovo Monitor
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            Nuovo Monitor
+        </h1>
+
+        <a href="{% url 'dashboard' %}"
+           class="btn btn-outline-secondary rounded-pill">
+            Torna alla dashboard
+        </a>
+    </div>
+
+    {% if errors %}
+    <div class="alert alert-danger shadow-sm">
+        <ul class="mb-0">
+        {% for field, messages in errors.items %}
+            {% for message in messages %}
+                <li>
+                    {{ field }}: {{ message }}
+                </li>
+            {% endfor %}
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">
+                Configurazione Monitor
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <form method="post">
+
+            {% csrf_token %}
+
+            <!-- dati principali -->
+            <div class="section-title mb-3">
+                Dati principali
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Nome
+                    </label>
+
+                    <input
+                        type="text"
+                        name="name"
+                        class="form-control"
+                        required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        URL
+                    </label>
+
+                    <input
+                        type="url"
+                        name="url"
+                        class="form-control"
+                        placeholder="https://example.com"
+                        required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Intervallo controllo
+                    </label>
+
+                    <div class="input-group">
+                        <input
+                            type="number"
+                            name="check_interval_seconds"
+                            class="form-control"
+                            value="60"
+                            min="1">
+
+                        <span class="input-group-text">
+                            sec
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Timeout
+                    </label>
+
+                    <div class="input-group">
+                        <input
+                            type="number"
+                            name="timeout_seconds"
+                            class="form-control"
+                            value="30"
+                            min="1">
+
+                        <span class="input-group-text">
+                            sec
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="form-check mb-4">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="is_active"
+                    checked>
+
+                <label class="form-check-label">
+                    Attiva monitor subito
+                </label>
+            </div>
+
+            <hr>
+
+            <div class="section-title mb-3">
+                Badge
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Badge monitor
+                </label>
+
+                <input
+                    type="text"
+                    name="badges"
+                    class="form-control"
+                    placeholder="Production, Backend, Cliente A">
+
+                <div class="form-text">
+                    Inserisci più badge separandoli con una virgola.
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- configurazione http -->
+            <div class="section-title mb-3">
+                Configurazione HTTP
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Metodo HTTP
+                    </label>
+
+                    <select
+                        name="http_method"
+                        class="form-select">
+
+                        {% for value,label in http_methods %}
+
+                        <option value="{{ value }}">
+                            {{ label }}
+                        </option>
+
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Redirect
+                    </label>
+
+                    <select
+                        name="follow_redirects"
+                        class="form-select">
+
+                        <option value="true" selected>
+                            Segui redirect
+                        </option>
+
+                        <option value="false">
+                            Non seguire redirect
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Versione IP
+                    </label>
+
+                    <select
+                        name="ip_version"
+                        class="form-select">
+
+                        {% for value, label in ip_versions %}
+
+                            <option value="{{ value }}">
+                                {{ label }}
+                            </option>
+
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Codici HTTP accettati
+                </label>
+
+                <input
+                    type="text"
+                    name="accepted_status_codes"
+                    class="form-control"
+                    value="2xx,3xx">
+            </div>
+
+            <hr>
+
+            <!-- request -->
+            <div class="section-title mb-3">
+                Request
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Headers HTTP
+                </label>
+
+                <textarea
+                    name="request_headers"
+                    class="form-control"
+                    rows="4"
+                    placeholder='{"Authorization":"Bearer token"}'></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Body richiesta
+                </label>
+
+                <textarea
+                    name="request_body"
+                    class="form-control"
+                    rows="4"></textarea>
+            </div>
+
+            <div class="form-check mb-4">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="send_body_as_json">
+
+                <label class="form-check-label">
+                    Invia body come JSON
+                </label>
+            </div>
+
+            <hr>
+
+            <!-- autenticazione -->
+            <div class="section-title mb-3">
+                Autenticazione
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Tipo autenticazione
+                    </label>
+
+                    <select
+                        name="auth_type"
+                        class="form-select">
+
+                        <select
+                            name="auth_type"
+                            class="form-select">
+
+                            {% for value, label in auth_types %}
+
+                                <option value="{{ value }}">
+                                    {{ label }}
+                                </option>
+
+                            {% endfor %}
+                        </select>
+                    </select>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Username
+                    </label>
+
+                    <input
+                        type="text"
+                        name="auth_username"
+                        class="form-control">
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        name="auth_password"
+                        class="form-control">
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- alert -->
+            <div class="section-title mb-3">
+                Alert
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        Fallimenti consecutivi
+                    </label>
+
+                    <input
+                        type="number"
+                        name="consecutive_failures_threshold"
+                        class="form-control"
+                        value="2">
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Soglia risposta lenta
+                    </label>
+
+                    <div class="input-group">
+                        <input
+                            type="number"
+                            name="slow_response_threshold_ms"
+                            class="form-control">
+
+                        <span class="input-group-text">
+                            ms
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+                <button
+                    class="btn btn-primary rounded-pill px-4">
+                    Crea Monitor
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}
