@@ -40,10 +40,18 @@ Monitor #{{ monitor.id }}
             </div>
         </div>
 
-        <a href="{% url 'dashboard' %}"
-        class="btn btn-outline-secondary rounded-pill">
-            Lista monitor
-        </a>
+        <div class="d-flex gap-2">
+            <form method="post" action="{% url 'monitor_duplicate' monitor.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary rounded-pill">
+                    Duplica
+                </button>
+            </form>
+
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary rounded-pill">
+                Lista monitor
+            </a>
+        </div>
     </div>
 
     <!-- sommario -->

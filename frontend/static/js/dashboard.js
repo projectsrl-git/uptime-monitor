@@ -22,7 +22,7 @@ const STATUS_CONFIG = {
         text: "PAUSED"
     },
     not_started: {
-        classes: ["bg-secondary"],
+        classes: ["bg-secondary", "text-dark"],
         text: "NOT STARTED"
     }
 };
