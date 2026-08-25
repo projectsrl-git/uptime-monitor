@@ -51,6 +51,31 @@ Monitor #{{ monitor.id }}
                     Duplica
                 </button>
             </form>
+
+            <!-- disattiva/attiva -->
+            {% if monitor.is_active %}
+
+                <button
+                    type="button"
+                    id="deactivate-monitor-btn"
+                    class="btn btn-outline-danger rounded-pill"
+                    data-monitor-id="{{ monitor.id }}">
+                    <i class="bi bi-pause-circle me-1"></i>
+                    Disattiva
+                </button>
+
+            {% else %}
+
+                <button
+                    type="button"
+                    id="activate-monitor-btn"
+                    class="btn btn-outline-success rounded-pill"
+                    data-monitor-id="{{ monitor.id }}">
+                    <i class="bi bi-play-circle me-1"></i>
+                    Attiva
+                </button>
+
+            {% endif %}
         </div>
     </div>
 

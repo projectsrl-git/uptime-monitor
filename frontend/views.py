@@ -155,3 +155,15 @@ def duplicate_monitor(request, id):
     )
 
     return redirect("dashboard")
+
+
+def toggle_monitor_active(request, id):
+    if request.method != "POST":
+        return redirect("monitor_detail", id=id)
+
+    monitor = get_object_or_404(Monitor, id=id)
+
+    monitor.is_active = not monitor.is_active
+    monitor.save(update_fields=["is_active", "updated_at"])
+
+    return redirect("monitor_detail", id=id)

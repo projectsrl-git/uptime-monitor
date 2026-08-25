@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
@@ -146,9 +147,21 @@ class MonitorViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         monitor = self.get_object()
         monitor.is_active = False
-        monitor.save(update_fields=["is_active"])
+        monitor.save(update_fields=["is_active", "updated_at"])
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"])
+    def activate(self, request, pk=None):
+        monitor = self.get_object()
+
+        monitor.is_active = True
+        monitor.save(update_fields=["is_active", "updated_at"])
+
+        return Response(
+            MonitorReadSerializer(monitor).data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class MonitorUptimeView(APIView):
