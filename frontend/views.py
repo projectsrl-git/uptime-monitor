@@ -44,6 +44,37 @@ def add_monitor_page(request):
     return render(request, "add_monitor.html", context)
 
 
+def edit_monitor_page(request, id):
+
+    monitor = get_object_or_404(Monitor, id=id)
+
+    context = {
+        "monitor": monitor,
+        "http_methods": Monitor.HTTP_METHOD_CHOICES,
+        "auth_types": Monitor.AUTH_TYPE_CHOICES,
+        "ip_versions": Monitor.IP_VERSION_CHOICES,
+    }
+
+    if request.method == "POST":
+
+        data = prepare_monitor_data(request.POST)
+
+        serializer = MonitorWriteSerializer(
+            monitor,
+            data=data,
+        )
+
+        if serializer.is_valid():
+
+            serializer.save()
+
+            return redirect("monitor_detail", id=monitor.id)
+
+        context["errors"] = serializer.errors
+
+    return render(request, "add_monitor.html", context)
+
+
 def prepare_monitor_data(data):
 
     data = data.dict()

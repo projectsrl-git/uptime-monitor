@@ -12,14 +12,10 @@ Monitor #{{ monitor.id }}
     <!-- header -->
     <div class="d-flex justify-content-between align-items-start mb-4">
         <div>
-            <h1 class="mb-1">
+            <h1 class="mb-4">
                 {{ monitor.name }}
             </h1>
-            
-            <div class="text-muted text-break mb-2">
-                {{ monitor.url }}
-            </div>
-            
+                        
             <!-- badge -->
             <div class="d-flex flex-wrap gap-2 align-items-center">
                 <span class="text-muted small">
@@ -40,17 +36,21 @@ Monitor #{{ monitor.id }}
             </div>
         </div>
 
+        <!-- pulsanti -->
         <div class="d-flex gap-2">
+
+            <!-- modifica -->
+            <a href="{% url 'monitor_edit' monitor.id %}" class="btn btn-primary rounded-pill">
+                Modifica
+            </a>
+
+            <!-- duplica -->
             <form method="post" action="{% url 'monitor_duplicate' monitor.id %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary rounded-pill">
                     Duplica
                 </button>
             </form>
-
-            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary rounded-pill">
-                Lista monitor
-            </a>
         </div>
     </div>
 
@@ -272,7 +272,7 @@ Monitor #{{ monitor.id }}
                     </div>
 
                     <div class="fw-semibold mt-1">
-                        {{ monitor.get_ip_version_display }}
+                        {{ monitor.ip_version_display }}
                     </div>
                 </div>
 
@@ -342,7 +342,7 @@ Monitor #{{ monitor.id }}
                     </div>
 
                     <div class="fw-semibold mt-1">
-                        {{ monitor.get_auth_type_display }}
+                        {{ monitor.auth_type_display }}
                     </div>
                 </div>
 
@@ -396,10 +396,14 @@ Monitor #{{ monitor.id }}
                         Creato
                     </div>
 
-                    <div class="fw-semibold"
-                        data-date="{{ monitor.created_at }}">
-                        {{ monitor.created_at }}
-                    </div>
+                    {% if monitor.created_at %}
+                        <div class="fw-semibold"
+                            data-date="{{ monitor.created_at }}">
+                            {{ monitor.created_at }}
+                        </div>
+                    {% else %}
+                        -
+                    {% endif %}
                 </div>
 
                 <div class="col-md-4 border-end">
@@ -407,10 +411,14 @@ Monitor #{{ monitor.id }}
                         Ultimo aggiornamento
                     </div>
 
-                    <div class="fw-semibold"
-                        data-date="{{ monitor.updated_at }}">
-                        {{ monitor.updated_at }}
-                    </div>
+                    {% if monitor.updated_at %}
+                        <div class="fw-semibold"
+                            data-date="{{ monitor.updated_at }}">
+                            {{ monitor.updated_at }}
+                        </div>
+                    {% else %}
+                        -
+                    {% endif %}
                 </div>
 
                 <div class="col-md-4">
