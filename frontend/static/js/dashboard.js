@@ -205,7 +205,7 @@ async function renderMonitors(monitors) {
                         document.createElement("span");
 
                     badgeElement.className =
-                        "badge rounded-pill text-bg-primary monitor-custom-badge";
+                        "badge rounded-pill text-bg-secondary monitor-custom-badge";
 
                     badgeElement.textContent = badge;
 
