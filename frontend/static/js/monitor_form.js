@@ -12,10 +12,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const data = buildMonitorData(form);
 
+        const monitorId = form.dataset.monitorId;
+
+        let url = form.dataset.apiUrl;
+        let method = "POST";
+
+        if (monitorId) {
+            url = `${url}${monitorId}/`;
+            method = "PATCH";
+        }
+
         const response = await fetch(
-            form.dataset.apiUrl,
+            url,
             {
-                method: "POST",
+                method: method,
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": getCookie("csrftoken"),
