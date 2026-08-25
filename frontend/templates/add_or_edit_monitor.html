@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
 {% if monitor %}
@@ -49,10 +50,12 @@ Nuovo Monitor
         </div>
 
         <div class="card-body">
-            <form method="post"
-                action="{% if monitor %}{% url 'monitor_edit' monitor.id %}{% else %}{% url 'add_monitor' %}{% endif %}">
+        <form
+            method="post"
+            id="monitor-form"
+            data-success-url="{% url 'dashboard' %}"
+            data-api-url="{% url 'monitor-list' %}">  
             {% csrf_token %}
-
             <!-- dati principali -->
             <div class="section-title mb-3">
                 Dati principali
@@ -133,7 +136,7 @@ Nuovo Monitor
                     class="form-check-input"
                     type="checkbox"
                     name="is_active"
-                    checked>
+                    {% if not monitor or monitor.is_active %}checked{% endif %}>
 
                 <label class="form-check-label">
                     Attiva monitor subito
@@ -358,7 +361,6 @@ Nuovo Monitor
                         type="number"
                         name="consecutive_failures_threshold"
                         class="form-control"
-                        value="2"
                         value="{{ monitor.consecutive_failures_threshold|default:2 }}">
                 </div>
 
@@ -384,12 +386,9 @@ Nuovo Monitor
 
             <div class="d-flex justify-content-end mt-4">
                 <button
+                    type="submit"
                     class="btn btn-primary rounded-pill px-4">
-                    {% if monitor %}
-                        Salva modifiche
-                    {% else %}
-                        Crea Monitor
-                    {% endif %}
+                    Crea Monitor
                 </button>
             </div>
 
@@ -397,4 +396,8 @@ Nuovo Monitor
     </div>
 </div>
 
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/monitor_form.js' %}"></script>
 {% endblock %}

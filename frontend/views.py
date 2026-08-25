@@ -2,7 +2,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 
 from incident.models import Incident
 from monitor.models import Monitor
-from monitor.serializer import MonitorReadSerializer, MonitorWriteSerializer
+from monitor.serializer import MonitorReadSerializer
+
 
 def home(request):
 
@@ -25,23 +26,11 @@ def add_monitor_page(request):
         "ip_versions": Monitor.IP_VERSION_CHOICES,
     }
 
-    if request.method == "POST":
-
-        data = prepare_monitor_data(request.POST)
-
-        serializer = MonitorWriteSerializer(data=data)
-
-        if serializer.is_valid():
-
-            serializer.save()
-
-            return redirect("dashboard")
-
-        print(serializer.errors)
-
-        return render(request, "add_monitor.html", {"errors": serializer.errors})
-
-    return render(request, "add_monitor.html", context)
+    return render(
+        request,
+        "add_or_edit_monitor.html",
+        context,
+    )
 
 
 def edit_monitor_page(request, id):
@@ -49,48 +38,17 @@ def edit_monitor_page(request, id):
     monitor = get_object_or_404(Monitor, id=id)
 
     context = {
-        "monitor": monitor,
+        "monitor": MonitorReadSerializer(monitor).data,
         "http_methods": Monitor.HTTP_METHOD_CHOICES,
         "auth_types": Monitor.AUTH_TYPE_CHOICES,
         "ip_versions": Monitor.IP_VERSION_CHOICES,
     }
 
-    if request.method == "POST":
-
-        data = prepare_monitor_data(request.POST)
-
-        serializer = MonitorWriteSerializer(
-            monitor,
-            data=data,
-        )
-
-        if serializer.is_valid():
-
-            serializer.save()
-
-            return redirect("monitor_detail", id=monitor.id)
-
-        context["errors"] = serializer.errors
-
-    return render(request, "add_monitor.html", context)
-
-
-def prepare_monitor_data(data):
-
-    data = data.dict()
-
-    data["accepted_status_codes"] = [
-        code.strip() for code in data["accepted_status_codes"].split(",")
-    ]
-
-    data["badges"] = [
-        badge.strip() for badge in data.get("badges", "").split(",") if badge.strip()
-    ]
-
-    if data.get("slow_response_threshold_ms") == "":
-        data["slow_response_threshold_ms"] = None
-
-    return data
+    return render(
+        request,
+        "add_or_edit_monitor.html",
+        context,
+    )
 
 
 def incidents_page(request):
@@ -107,12 +65,20 @@ def incidents_page(request):
 
 
 def incident_detail(request, id):
+
     incident = Incident.objects.get(id=id)
 
-    return render(request, "incident_detail.html", {"incident": incident})
+    return render(
+        request,
+        "incident_detail.html",
+        {
+            "incident": incident,
+        },
+    )
 
 
 def monitor_detail(request, id):
+
     monitor = get_object_or_404(Monitor, id=id)
 
     serializer = MonitorReadSerializer(monitor)
@@ -127,6 +93,7 @@ def monitor_detail(request, id):
 
 
 def duplicate_monitor(request, id):
+
     if request.method != "POST":
         return redirect("monitor_detail", id=id)
 
@@ -155,15 +122,3 @@ def duplicate_monitor(request, id):
     )
 
     return redirect("dashboard")
-
-
-def toggle_monitor_active(request, id):
-    if request.method != "POST":
-        return redirect("monitor_detail", id=id)
-
-    monitor = get_object_or_404(Monitor, id=id)
-
-    monitor.is_active = not monitor.is_active
-    monitor.save(update_fields=["is_active", "updated_at"])
-
-    return redirect("monitor_detail", id=id)
