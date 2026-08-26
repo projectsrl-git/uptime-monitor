@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById(
             "response-time-average"
         ).textContent =
-            formatMilliseconds(responseTime.average_ms);
+            formatMilliseconds(Math.round(responseTime.average_ms));
 
 
         document.getElementById(
