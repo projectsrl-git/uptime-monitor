@@ -45,8 +45,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             updateSummary(data.summary);
             updateResponseTime(data.response_time);
+
+            updateUptimeChart(data.uptime);
             updateResponseTimeChart(data.response_time_over_time);
             updateChecksChart(data.checks);
+            updateIncidentsChart(data.incidents);
 
             updateCharts(data);
 
@@ -490,45 +493,140 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateIncidentsChart(data) {
 
-        const labels = data.map(item =>
-            formatDate(item.date)
-        );
+        const canvas = document.getElementById("incidents-chart");
 
-        const values = data.map(item =>
-            item.count
-        );
+        if (!canvas) {
+            return;
+        }
+
+        const now = new Date();
+        const start = new Date(now);
+
+        if (currentPeriod === "24h") {
+            start.setHours(start.getHours() - 24);
+        }
+
+        else if (currentPeriod === "7d") {
+            start.setDate(start.getDate() - 7);
+        }
+
+        else if (currentPeriod === "30d") {
+            start.setDate(start.getDate() - 30);
+        }
+
+        else if (currentPeriod === "365d") {
+            start.setDate(start.getDate() - 365);
+        }
+
+        let bucketMilliseconds;
+
+        if (currentPeriod === "24h") {
+            bucketMilliseconds = 60 * 60 * 1000;
+        }
+
+        else if (currentPeriod === "7d") {
+            bucketMilliseconds = 6 * 60 * 60 * 1000;
+        }
+
+        else if (currentPeriod === "30d") {
+            bucketMilliseconds = 24 * 60 * 60 * 1000;
+        }
+
+        else {
+            bucketMilliseconds = 7 * 24 * 60 * 60 * 1000;
+        }
+
+        const labels = [];
+        const values = [];
+
+        let current = new Date(start);
+
+        while (current < now) {
+
+            const bucketEnd = new Date(
+                current.getTime() + bucketMilliseconds
+            );
+
+            let count = 0;
+
+            data.forEach(item => {
+
+                const itemDate = new Date(item.date);
+
+                if (
+                    itemDate >= current &&
+                    itemDate < bucketEnd
+                ) {
+                    count += item.count;
+                }
+            });
+
+            labels.push(
+                formatDate(
+                    current.toISOString(),
+                    currentPeriod
+                )
+            );
+
+            values.push(count);
+
+            current = bucketEnd;
+        }
 
         if (incidentsChart) {
             incidentsChart.destroy();
         }
 
-        incidentsChart = new Chart(
-            document.getElementById("incidents-chart"),
-            {
-                type: "bar",
+        incidentsChart = new Chart(canvas, {
+            type: "bar",
 
-                data: {
-                    labels: labels,
+            data: {
+                labels: labels,
 
-                    datasets: [
-                        {
-                            label: "Incidenti",
-                            data: values
+                datasets: [{
+                    label: "Incidenti",
+                    data: values,
+
+                    backgroundColor: "rgba(220, 53, 69, 0.7)",
+                    borderColor: "rgba(220, 53, 69, 1)",
+                    borderWidth: 1
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+
+                        ticks: {
+                            precision: 0
+                        },
+
+                        title: {
+                            display: true,
+                            text: "Incidenti"
                         }
-                    ]
+                    },
+
+                    x: {
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 12,
+                            maxRotation: 0
+                        }
+                    }
                 },
 
-                options: {
-                    responsive: true,
-
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                plugins: {
+                    legend: {
+                        display: false
                     }
                 }
             }
-        );
+        });
     }
 
 
