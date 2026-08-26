@@ -1,8 +1,8 @@
 from datetime import timedelta
 
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Count, Max, Min, Q
+from django.db.models.functions import TruncHour, TruncDay
 from django.utils import timezone
-from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -19,6 +19,13 @@ VALID_PERIODS = (
     "30d",
     "365d",
 )
+
+PERIODS = {
+    "24h": timedelta(hours=24),
+    "7d": timedelta(days=7),
+    "30d": timedelta(days=30),
+    "365d": timedelta(days=365),
+}
 
 
 class StatisticsView(APIView):
@@ -38,16 +45,10 @@ class StatisticsView(APIView):
                 }
             )
 
-        durations = {
-            "24h": timedelta(hours=24),
-            "7d": timedelta(days=7),
-            "30d": timedelta(days=30),
-            "365d": timedelta(days=365),
-        }
 
         now = timezone.now()
 
-        period_start = now - durations[period]
+        period_start = now - PERIODS[period]
 
         checks = Check.objects.filter(
             executed_at__gte=period_start,
@@ -98,10 +99,7 @@ class StatisticsView(APIView):
 
         incidents = Incident.objects.filter(
             started_at__lt=now,
-        ).filter(
-            Q(ended_at__isnull=True)
-            | Q(ended_at__gt=period_start)
-        )
+        ).filter(Q(ended_at__isnull=True) | Q(ended_at__gt=period_start))
 
         total_downtime = 0
 
@@ -119,11 +117,7 @@ class StatisticsView(APIView):
 
             if incident_end > incident_start:
 
-                total_downtime += int(
-                    (
-                        incident_end - incident_start
-                    ).total_seconds()
-                )
+                total_downtime += int((incident_end - incident_start).total_seconds())
 
         incident_count = Incident.objects.filter(
             started_at__gte=period_start,
@@ -146,10 +140,14 @@ class MonitorStatisticsView(APIView):
 
     def get(self, request, pk):
 
-        monitor = get_object_or_404(
-            Monitor,
-            id=pk,
-        )
+        try:
+            monitor = Monitor.objects.get(pk=pk)
+
+        except Monitor.DoesNotExist:
+            return Response(
+                {"detail": "Monitor non trovato"},
+                status=404,
+            )
 
         period = request.query_params.get(
             "period",
@@ -167,33 +165,45 @@ class MonitorStatisticsView(APIView):
                 }
             )
 
-        durations = {
-            "24h": timedelta(hours=24),
-            "7d": timedelta(days=7),
-            "30d": timedelta(days=30),
-            "365d": timedelta(days=365),
-        }
-
         now = timezone.now()
-        period_start = now - durations[period]
+        period_start = now - PERIODS[period]
 
-        checks = monitor.checks.filter(
+        # ==================================================
+        # CHECK
+        # ==================================================
+
+        checks = Check.objects.filter(
+            monitor=monitor,
             executed_at__gte=period_start,
             executed_at__lte=now,
         )
 
-        check_statistics = checks.aggregate(
-            response_time_average_ms=Avg("response_time_ms"),
-            checks=Count("id"),
+        check_stats = checks.aggregate(
+            total=Count("id"),
+            successful=Count("id", filter=Q(success=True)),
+            failed=Count("id", filter=Q(success=False)),
+            response_time_min=Min("response_time_ms"),
+            response_time_max=Max("response_time_ms"),
+            response_time_average=Avg("response_time_ms"),
         )
 
-        successful_checks = checks.filter(
-            success=True,
-        ).count()
+        total_checks = check_stats["total"] or 0
+        successful_checks = check_stats["successful"] or 0
+        failed_checks = check_stats["failed"] or 0
 
-        failed_checks = checks.filter(
-            success=False,
-        ).count()
+        response_time_min = check_stats["response_time_min"]
+        response_time_max = check_stats["response_time_max"]
+        response_time_average = check_stats["response_time_average"]
+
+        if response_time_average is not None:
+            response_time_average = round(
+                response_time_average,
+                2,
+            )
+
+        # ==================================================
+        # UPTIME
+        # ==================================================
 
         uptime_result = calculate_uptime(
             monitor,
@@ -201,9 +211,28 @@ class MonitorStatisticsView(APIView):
             now,
         )
 
-        incidents = monitor.incidents.filter(
+        uptime_percentage = uptime_result.get("uptime_percentage")
+
+        # ==================================================
+        # INCIDENTI
+        # ==================================================
+
+        incidents = Incident.objects.filter(
+            monitor=monitor,
             started_at__lt=now,
         ).filter(Q(ended_at__isnull=True) | Q(ended_at__gt=period_start))
+
+        incidents = incidents.distinct()
+
+        incident_count = Incident.objects.filter(
+            monitor=monitor,
+            started_at__gte=period_start,
+            started_at__lte=now,
+        ).count()
+
+        # ==================================================
+        # DOWNTIME
+        # ==================================================
 
         total_downtime = 0
 
@@ -223,30 +252,162 @@ class MonitorStatisticsView(APIView):
 
                 total_downtime += int((incident_end - incident_start).total_seconds())
 
-        incident_count = monitor.incidents.filter(
-            started_at__gte=period_start,
-            started_at__lte=now,
-        ).count()
+        # ==================================================
+        # RESPONSE TIME NEL TEMPO
+        # ==================================================
 
-        response_time_average = check_statistics["response_time_average_ms"]
+        if period == "24h":
 
-        if response_time_average is not None:
-            response_time_average = round(
-                response_time_average,
-                2,
+            trunc_function = TruncHour("executed_at")
+
+        else:
+
+            trunc_function = TruncDay("executed_at")
+
+        response_time_data = (
+            checks.annotate(date=trunc_function)
+            .values("date")
+            .annotate(average_ms=Avg("response_time_ms"))
+            .order_by("date")
+        )
+
+        response_time = []
+
+        for item in response_time_data:
+
+            average_ms = item["average_ms"]
+
+            if average_ms is not None:
+                average_ms = round(
+                    average_ms,
+                    2,
+                )
+
+            response_time.append(
+                {
+                    "date": item["date"],
+                    "average_ms": average_ms,
+                }
             )
+
+        # ==================================================
+        # CHECK NEL TEMPO
+        # ==================================================
+
+        check_data = (
+            checks.annotate(date=trunc_function)
+            .values("date")
+            .annotate(
+                successful=Count("id", filter=Q(success=True)),
+                failed=Count("id", filter=Q(success=False)),
+            )
+            .order_by("date")
+        )
+
+        checks_over_time = []
+
+        for item in check_data:
+
+            checks_over_time.append(
+                {
+                    "date": item["date"],
+                    "successful": item["successful"],
+                    "failed": item["failed"],
+                }
+            )
+
+        # ==================================================
+        # INCIDENTI NEL TEMPO
+        # ==================================================
+
+        incident_data = (
+            Incident.objects.filter(
+                monitor=monitor,
+                started_at__gte=period_start,
+                started_at__lte=now,
+            )
+            .annotate(date=TruncDay("started_at"))
+            .values("date")
+            .annotate(count=Count("id"))
+            .order_by("date")
+        )
+
+        incidents_over_time = []
+
+        for item in incident_data:
+
+            incidents_over_time.append(
+                {
+                    "date": item["date"],
+                    "count": item["count"],
+                }
+            )
+
+        # ==================================================
+        # UPTIME NEL TEMPO
+        # ==================================================
+
+        uptime = []
+
+        if period == "24h":
+            bucket = timedelta(hours=1)
+
+        elif period == "7d":
+            bucket = timedelta(hours=6)
+
+        elif period == "30d":
+            bucket = timedelta(days=1)
+
+        else:
+            bucket = timedelta(days=7)
+
+        current_start = period_start
+
+        while current_start < now:
+
+            current_end = min(
+                current_start + bucket,
+                now,
+            )
+
+            result = calculate_uptime(
+                monitor,
+                current_start,
+                current_end,
+            )
+
+            uptime.append(
+                {
+                    "date": current_start,
+                    "uptime_percentage": result.get("uptime_percentage"),
+                }
+            )
+
+            current_start = current_end
+
+        # ==================================================
+        # RESPONSE
+        # ==================================================
 
         return Response(
             {
                 "period": period,
                 "summary": {
-                    "uptime_percentage": uptime_result["uptime_percentage"],
+                    "uptime_percentage": uptime_percentage,
                     "downtime_seconds": total_downtime,
-                    "checks": check_statistics["checks"],
+                    "checks": total_checks,
                     "successful_checks": successful_checks,
                     "failed_checks": failed_checks,
-                    "response_time_average_ms": response_time_average,
                     "incidents": incident_count,
                 },
+                "response_time": {
+                    "min_ms": response_time_min,
+                    "max_ms": response_time_max,
+                    "average_ms": response_time_average,
+                },
+                "checks": checks_over_time,
+                "uptime": uptime,
+                "response_time_over_time": response_time,
+                "incidents": incidents_over_time,
             }
         )
