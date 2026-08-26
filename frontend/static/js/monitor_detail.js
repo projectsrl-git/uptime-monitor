@@ -125,6 +125,60 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // schede
+    const overviewTab = document.getElementById(
+        "overview-tab"
+    );
+
+    const configurationTab = document.getElementById(
+        "configuration-tab"
+    );
+
+    const overviewContent = document.getElementById(
+        "overview-content"
+    );
+
+    const configurationContent = document.getElementById(
+        "configuration-content"
+    );
+
+
+    if (
+        overviewTab &&
+        configurationTab &&
+        overviewContent &&
+        configurationContent
+    ) {
+
+        overviewTab.addEventListener("click", () => {
+
+            overviewContent.classList.remove("d-none");
+            configurationContent.classList.add("d-none");
+
+            overviewTab.classList.remove("btn-outline-primary");
+            overviewTab.classList.add("btn-primary");
+
+            configurationTab.classList.remove("btn-primary");
+            configurationTab.classList.add("btn-outline-primary");
+
+        });
+
+
+        configurationTab.addEventListener("click", () => {
+
+            configurationContent.classList.remove("d-none");
+            overviewContent.classList.add("d-none");
+
+            configurationTab.classList.remove("btn-outline-primary");
+            configurationTab.classList.add("btn-primary");
+
+            overviewTab.classList.remove("btn-primary");
+            overviewTab.classList.add("btn-outline-primary");
+
+        });
+
+    }
+
 });
 
 

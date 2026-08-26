@@ -85,7 +85,7 @@ def monitor_detail(request, id):
 
     return render(
         request,
-        "monitor_detail.html",
+        "monitor_detail/monitor_detail.html",
         {
             "monitor": serializer.data,
         },
