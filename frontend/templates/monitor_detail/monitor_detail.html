@@ -204,11 +204,16 @@ Monitor #{{ monitor.id }}
     <div id="configuration-content" class="d-none">
         {% include "monitor_detail/configuration.html" %}
     </div>
-
+    
+    <script>
+        const monitorId = {{ monitor.id }};
+    </script>
+    
 </div>
 
 {% endblock %}
 
 {% block javascript %}
 <script src="{% static 'js/monitor_detail.js' %}"></script>
+<script src="{% static 'js/monitor_overview.js' %}"></script>
 {% endblock %}

@@ -1,13 +1,192 @@
+<div class="d-flex justify-content-center mb-4">
+
+    <div class="btn-group" role="group">
+
+        <button
+            type="button"
+            class="btn btn-primary statistics-period"
+            data-period="24h">
+            24h
+        </button>
+
+        <button
+            type="button"
+            class="btn btn-outline-primary statistics-period"
+            data-period="7d">
+            7 giorni
+        </button>
+
+        <button
+            type="button"
+            class="btn btn-outline-primary statistics-period"
+            data-period="30d">
+            30 giorni
+        </button>
+
+        <button
+            type="button"
+            class="btn btn-outline-primary statistics-period"
+            data-period="365d">
+            365 giorni
+        </button>
+
+    </div>
+
+</div>
+
+<!-- sommario -->
 <div class="card shadow-sm mb-4">
     <div class="card-header">
         <h5 class="mb-0">
-            Panoramica
+            Sommario
         </h5>
     </div>
 
     <div class="card-body">
-        <p class="text-muted mb-0">
-            Statistiche e grafici del monitor.
-        </p>
+        <div class="row text-center">
+
+            <div class="col-md-3 border-end">
+                <div class="text-muted small">
+                    Uptime
+                </div>
+
+                <div id="uptime-percentage" class="fw-semibold mt-1">
+                    -
+                </div>
+            </div>
+
+            <div class="col-md-3 border-end">
+                <div class="text-muted small">
+                    Downtime
+                </div>
+
+                <div id="downtime" class="fw-semibold mt-1">
+                    -
+                </div>
+            </div>
+
+            <div class="col-md-3 border-end">
+                <div class="text-muted small">
+                    Check
+                </div>
+
+                <div id="checks" class="fw-semibold mt-1">
+                    -
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="text-muted small">
+                    Incidenti
+                </div>
+
+                <div id="incidents" class="fw-semibold mt-1">
+                    -
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- response time -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            Response time
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <div class="row text-center">
+
+            <div class="col-md-4 border-end">
+                <div class="text-muted small">
+                    Minimo
+                </div>
+
+                <div id="response-time-min" class="fw-semibold mt-1">
+                    -
+                </div>
+            </div>
+
+            <div class="col-md-4 border-end">
+                <div class="text-muted small">
+                    Medio
+                </div>
+
+                <div id="response-time-average" class="fw-semibold mt-1">
+                    -
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="text-muted small">
+                    Massimo
+                </div>
+
+                <div id="response-time-max" class="fw-semibold mt-1">
+                    -
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- uptime nel tempo -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            Uptime nel tempo
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <canvas id="uptime-chart"></canvas>
+    </div>
+</div>
+
+
+<!-- response time nel tempo -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            Response time nel tempo
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <canvas id="response-time-chart"></canvas>
+    </div>
+</div>
+
+
+<!-- check nel tempo -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            Check nel tempo
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <canvas id="checks-chart"></canvas>
+    </div>
+</div>
+
+
+<!-- incidenti nel tempo -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            Incidenti nel tempo
+        </h5>
+    </div>
+
+    <div class="card-body">
+        <canvas id="incidents-chart"></canvas>
     </div>
 </div>
