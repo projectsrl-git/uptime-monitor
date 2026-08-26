@@ -2,6 +2,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let currentPeriod = "24h";
 
+    let uptimeChart = null;
+    let responseTimeChart = null;
+    let checksChart = null;
+    let incidentsChart = null;
+
     loadStatistics(currentPeriod);
 
 
@@ -40,6 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             updateSummary(data.summary);
             updateResponseTime(data.response_time);
+
+            updateCharts(data);
 
         } catch (error) {
 
@@ -102,6 +109,211 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+    function updateCharts(data) {
+
+        updateUptimeChart(data.uptime);
+
+        updateResponseTimeChart(data.response_time_over_time);
+
+        updateChecksChart(data.checks);
+
+        updateIncidentsChart(data.incidents);
+    }
+
+
+    function updateUptimeChart(data) {
+
+        const labels = data.map(item =>
+            formatDate(item.date)
+        );
+
+        const values = data.map(item =>
+            item.uptime_percentage
+        );
+
+        if (uptimeChart) {
+            uptimeChart.destroy();
+        }
+
+        uptimeChart = new Chart(
+            document.getElementById("uptime-chart"),
+            {
+                type: "line",
+
+                data: {
+                    labels: labels,
+
+                    datasets: [
+                        {
+                            label: "Uptime %",
+                            data: values,
+                            tension: 0.3,
+                            spanGaps: false
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            }
+        );
+    }
+
+
+    function updateResponseTimeChart(data) {
+
+        const labels = data.map(item =>
+            formatDate(item.date)
+        );
+
+        const values = data.map(item =>
+            item.average_ms
+        );
+
+        if (responseTimeChart) {
+            responseTimeChart.destroy();
+        }
+
+        responseTimeChart = new Chart(
+            document.getElementById("response-time-chart"),
+            {
+                type: "line",
+
+                data: {
+                    labels: labels,
+
+                    datasets: [
+                        {
+                            label: "Response time (ms)",
+                            data: values,
+                            tension: 0.3,
+                            spanGaps: false
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true
+                }
+            }
+        );
+    }
+
+
+    function updateChecksChart(data) {
+
+        const labels = data.map(item =>
+            formatDate(item.date)
+        );
+
+        const successful = data.map(item =>
+            item.successful
+        );
+
+        const failed = data.map(item =>
+            item.failed
+        );
+
+        if (checksChart) {
+            checksChart.destroy();
+        }
+
+        checksChart = new Chart(
+            document.getElementById("checks-chart"),
+            {
+                type: "bar",
+
+                data: {
+                    labels: labels,
+
+                    datasets: [
+                        {
+                            label: "Success",
+                            data: successful
+                        },
+                        {
+                            label: "Falliti",
+                            data: failed
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true
+                }
+            }
+        );
+    }
+
+
+    function updateIncidentsChart(data) {
+
+        const labels = data.map(item =>
+            formatDate(item.date)
+        );
+
+        const values = data.map(item =>
+            item.count
+        );
+
+        if (incidentsChart) {
+            incidentsChart.destroy();
+        }
+
+        incidentsChart = new Chart(
+            document.getElementById("incidents-chart"),
+            {
+                type: "bar",
+
+                data: {
+                    labels: labels,
+
+                    datasets: [
+                        {
+                            label: "Incidenti",
+                            data: values
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            }
+        );
+    }
+
+
+    function formatDate(date) {
+
+        const value = new Date(date);
+
+        return value.toLocaleString(
+            "it-IT",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+    }
+
+
     function formatMilliseconds(value) {
 
         if (value === null || value === undefined) {
@@ -147,6 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return parts.join(" ");
     }
+
 
     function updatePeriodButtons(activeButton) {
 
