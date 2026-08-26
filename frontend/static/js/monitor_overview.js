@@ -152,13 +152,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.querySelectorAll(".statistics-period").forEach(button => {
 
-            button.classList.remove("btn-primary");
-            button.classList.add("btn-outline-primary");
+            button.classList.remove("active");
 
         });
 
-        activeButton.classList.remove("btn-outline-primary");
-        activeButton.classList.add("btn-primary");
+        activeButton.classList.add("active");
     }
 
 });
