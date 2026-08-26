@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             updateSummary(data.summary);
             updateResponseTime(data.response_time);
+            updateResponseTimeChart(data.response_time_over_time);
 
             updateCharts(data);
 
@@ -191,14 +192,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     scales: {
 
                         y: {
+                            title: {
+                                display: true,
+                                text: "Percentuale (%)",
+                            },
                             min: 0,
                             max: 100,
-
-                            ticks: {
-                                callback: function (value) {
-                                    return `${value}%`;
-                                }
-                            }
                         },
 
                         x: {
@@ -217,41 +216,130 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateResponseTimeChart(data) {
 
-        const labels = data.map(item =>
-            formatDate(item.date)
-        );
+        const canvas = document.getElementById("response-time-chart");
 
-        const values = data.map(item =>
-            item.average_ms
-        );
+        if (!canvas) {
+            return;
+        }
+
+        const now = new Date();
+        const start = new Date(now);
+
+        if (currentPeriod === "24h") {
+            start.setHours(start.getHours() - 24);
+        }
+
+        else if (currentPeriod === "7d") {
+            start.setDate(start.getDate() - 7);
+        }
+
+        else if (currentPeriod === "30d") {
+            start.setDate(start.getDate() - 30);
+        }
+
+        else if (currentPeriod === "365d") {
+            start.setDate(start.getDate() - 365);
+        }
+
+        let bucketMilliseconds;
+
+        if (currentPeriod === "24h") {
+            bucketMilliseconds = 60 * 60 * 1000;
+        }
+
+        else if (currentPeriod === "7d") {
+            bucketMilliseconds = 6 * 60 * 60 * 1000;
+        }
+
+        else if (currentPeriod === "30d") {
+            bucketMilliseconds = 24 * 60 * 60 * 1000;
+        }
+
+        else {
+            bucketMilliseconds = 7 * 24 * 60 * 60 * 1000;
+        }
+
+        const labels = [];
+        const values = [];
+
+        let current = new Date(start);
+
+        while (current < now) {
+
+            const bucketEnd = new Date(
+                current.getTime() + bucketMilliseconds
+            );
+
+            const item = data.find(item => {
+
+                const itemDate = new Date(item.date);
+
+                return (
+                    itemDate >= current &&
+                    itemDate < bucketEnd
+                );
+            });
+
+            labels.push(
+                formatDate(current.toISOString(), currentPeriod)
+            );
+
+            values.push(
+                item ? item.average_ms : null
+            );
+
+            current = bucketEnd;
+        }
 
         if (responseTimeChart) {
             responseTimeChart.destroy();
         }
 
-        responseTimeChart = new Chart(
-            document.getElementById("response-time-chart"),
-            {
-                type: "line",
+        responseTimeChart = new Chart(canvas, {
+            type: "line",
 
-                data: {
-                    labels: labels,
+            data: {
+                labels: labels,
 
-                    datasets: [
-                        {
-                            label: "Response time (ms)",
-                            data: values,
-                            tension: 0.3,
-                            spanGaps: false
+                datasets: [{
+                    label: "Response time",
+                    data: values,
+                    tension: 0.3,
+                    fill: false,
+                    spanGaps: false
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+
+                        title: {
+                            display: true,
+                            text: "Millisecondi (ms)"
                         }
-                    ]
+                    },
+                    
+                    x: {
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 12,
+                            maxRotation: 0
+                        }
+                    }
                 },
 
-                options: {
-                    responsive: true
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 }
             }
-        );
+        });
     }
 
 
