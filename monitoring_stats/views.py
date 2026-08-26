@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.db.models import Avg, Count, Q
 from django.utils import timezone
+from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -137,5 +138,115 @@ class StatisticsView(APIView):
                 "checks": check_statistics["checks"],
                 "incidents": incident_count,
                 "downtime_seconds": total_downtime,
+            }
+        )
+
+
+class MonitorStatisticsView(APIView):
+
+    def get(self, request, pk):
+
+        monitor = get_object_or_404(
+            Monitor,
+            id=pk,
+        )
+
+        period = request.query_params.get(
+            "period",
+            "24h",
+        )
+
+        if period not in VALID_PERIODS:
+            raise ValidationError(
+                {
+                    "period": (
+                        "Valore non valido. "
+                        f"Valori consentiti: "
+                        f"{', '.join(VALID_PERIODS)}"
+                    )
+                }
+            )
+
+        durations = {
+            "24h": timedelta(hours=24),
+            "7d": timedelta(days=7),
+            "30d": timedelta(days=30),
+            "365d": timedelta(days=365),
+        }
+
+        now = timezone.now()
+        period_start = now - durations[period]
+
+        checks = monitor.checks.filter(
+            executed_at__gte=period_start,
+            executed_at__lte=now,
+        )
+
+        check_statistics = checks.aggregate(
+            response_time_average_ms=Avg("response_time_ms"),
+            checks=Count("id"),
+        )
+
+        successful_checks = checks.filter(
+            success=True,
+        ).count()
+
+        failed_checks = checks.filter(
+            success=False,
+        ).count()
+
+        uptime_result = calculate_uptime(
+            monitor,
+            period_start,
+            now,
+        )
+
+        incidents = monitor.incidents.filter(
+            started_at__lt=now,
+        ).filter(Q(ended_at__isnull=True) | Q(ended_at__gt=period_start))
+
+        total_downtime = 0
+
+        for incident in incidents:
+
+            incident_start = max(
+                incident.started_at,
+                period_start,
+            )
+
+            incident_end = min(
+                incident.ended_at or now,
+                now,
+            )
+
+            if incident_end > incident_start:
+
+                total_downtime += int((incident_end - incident_start).total_seconds())
+
+        incident_count = monitor.incidents.filter(
+            started_at__gte=period_start,
+            started_at__lte=now,
+        ).count()
+
+        response_time_average = check_statistics["response_time_average_ms"]
+
+        if response_time_average is not None:
+            response_time_average = round(
+                response_time_average,
+                2,
+            )
+
+        return Response(
+            {
+                "period": period,
+                "summary": {
+                    "uptime_percentage": uptime_result["uptime_percentage"],
+                    "downtime_seconds": total_downtime,
+                    "checks": check_statistics["checks"],
+                    "successful_checks": successful_checks,
+                    "failed_checks": failed_checks,
+                    "response_time_average_ms": response_time_average,
+                    "incidents": incident_count,
+                },
             }
         )
