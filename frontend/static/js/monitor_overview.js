@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateUptimeChart(data) {
 
         const labels = data.map(item =>
-            formatDate(item.date)
+            formatDate(item.date, currentPeriod)
         );
 
         const values = data.map(item =>
@@ -145,9 +145,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     datasets: [
                         {
-                            label: "Uptime %",
+                            label: "Uptime",
                             data: values,
+
                             tension: 0.3,
+
+                            pointRadius: 2,
+                            pointHoverRadius: 5,
+
                             spanGaps: false
                         }
                     ]
@@ -155,11 +160,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+
+                    interaction: {
+                        intersect: false,
+                        mode: "index"
+                    },
+
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+
+                                    const value = context.raw;
+
+                                    if (value === null) {
+                                        return "Uptime: nessun dato";
+                                    }
+
+                                    return `Uptime: ${value.toFixed(2)}%`;
+                                }
+                            }
+                        },
+
+                        legend: {
+                            display: false
+                        }
+                    },
 
                     scales: {
+
                         y: {
                             min: 0,
-                            max: 100
+                            max: 100,
+
+                            ticks: {
+                                callback: function (value) {
+                                    return `${value}%`;
+                                }
+                            }
+                        },
+
+                        x: {
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 12,
+                                maxRotation: 0
+                            }
                         }
                     }
                 }
@@ -298,19 +345,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    function formatDate(date) {
+    function formatDate(dateString, period) {
 
-        const value = new Date(date);
+        const date = new Date(dateString);
 
-        return value.toLocaleString(
-            "it-IT",
-            {
-                day: "2-digit",
-                month: "2-digit",
+        if (period === "24h") {
+
+            return date.toLocaleTimeString("it-IT", {
                 hour: "2-digit",
                 minute: "2-digit"
-            }
-        );
+            });
+
+        }
+
+        if (period === "7d" || period === "30d") {
+
+            return date.toLocaleDateString("it-IT", {
+                day: "2-digit",
+                month: "short"
+            });
+
+        }
+
+        if (period === "365d") {
+
+            return date.toLocaleDateString("it-IT", {
+                month: "short",
+                year: "numeric"
+            });
+
+        }
+
+        return date.toLocaleDateString("it-IT");
     }
 
 
