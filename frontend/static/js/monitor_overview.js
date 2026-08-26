@@ -46,6 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
             updateSummary(data.summary);
             updateResponseTime(data.response_time);
             updateResponseTimeChart(data.response_time_over_time);
+            updateChecksChart(data.checks);
 
             updateCharts(data);
 
@@ -345,47 +346,145 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateChecksChart(data) {
 
-        const labels = data.map(item =>
-            formatDate(item.date)
-        );
+        const canvas = document.getElementById("checks-chart");
 
-        const successful = data.map(item =>
-            item.successful
-        );
+        if (!canvas) {
+            return;
+        }
 
-        const failed = data.map(item =>
-            item.failed
-        );
+        const now = new Date();
+        const start = new Date(now);
+
+        if (currentPeriod === "24h") {
+            start.setHours(start.getHours() - 24);
+        }
+
+        else if (currentPeriod === "7d") {
+            start.setDate(start.getDate() - 7);
+        }
+
+        else if (currentPeriod === "30d") {
+            start.setDate(start.getDate() - 30);
+        }
+
+        else if (currentPeriod === "365d") {
+            start.setDate(start.getDate() - 365);
+        }
+
+        let bucketMilliseconds;
+
+        if (currentPeriod === "24h") {
+            bucketMilliseconds = 60 * 60 * 1000;
+        }
+
+        else if (currentPeriod === "7d") {
+            bucketMilliseconds = 6 * 60 * 60 * 1000;
+        }
+
+        else if (currentPeriod === "30d") {
+            bucketMilliseconds = 24 * 60 * 60 * 1000;
+        }
+
+        else {
+            bucketMilliseconds = 7 * 24 * 60 * 60 * 1000;
+        }
+
+        const labels = [];
+        const successfulValues = [];
+        const failedValues = [];
+
+        let current = new Date(start);
+
+        while (current < now) {
+
+            const bucketEnd = new Date(
+                current.getTime() + bucketMilliseconds
+            );
+
+            const item = data.find(item => {
+
+                const itemDate = new Date(item.date);
+
+                return (
+                    itemDate >= current &&
+                    itemDate < bucketEnd
+                );
+            });
+
+            labels.push(
+                formatDate(
+                    current.toISOString(),
+                    currentPeriod
+                )
+            );
+
+            successfulValues.push(
+                item ? item.successful : null
+            );
+
+            failedValues.push(
+                item ? item.failed : null
+            );
+
+            current = bucketEnd;
+        }
 
         if (checksChart) {
             checksChart.destroy();
         }
 
-        checksChart = new Chart(
-            document.getElementById("checks-chart"),
-            {
-                type: "bar",
+        checksChart = new Chart(canvas, {
+            type: "bar",
 
-                data: {
-                    labels: labels,
+            data: {
+                labels: labels,
 
-                    datasets: [
-                        {
-                            label: "Success",
-                            data: successful
+                datasets: [
+                    {
+                        label: "Riusciti",
+                        data: successfulValues
+                    },
+                    {
+                        label: "Falliti",
+                        data: failedValues
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+
+                        ticks: {
+                            precision: 0
                         },
-                        {
-                            label: "Falliti",
-                            data: failed
+
+                        title: {
+                            display: true,
+                            text: "Check"
                         }
-                    ]
+                    },
+
+                    x: {
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 12,
+                            maxRotation: 0
+                        }
+                    }
                 },
 
-                options: {
-                    responsive: true
+                plugins: {
+                    legend: {
+                        display: true
+                    }
                 }
             }
-        );
+        });
     }
 
 
