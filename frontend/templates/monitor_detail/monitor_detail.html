@@ -42,12 +42,12 @@ Monitor #{{ monitor.id }}
             </a>
 
             <a href="{% url 'monitor_edit' monitor.id %}"
-               class="btn btn-primary rounded-pill">
+               class="btn btn-outline-warning rounded-pill">
                 Modifica
             </a>
 
             <button id="duplicate-monitor-btn"
-                    class="btn btn-primary rounded-pill"
+                    class="btn btn-outline-warning rounded-pill"
                     data-monitor-id="{{ monitor.id }}"
                     data-success-url="{% url 'dashboard' %}">
                 Duplica
