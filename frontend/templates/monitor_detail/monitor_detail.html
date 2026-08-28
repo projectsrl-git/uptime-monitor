@@ -34,6 +34,13 @@ Monitor #{{ monitor.id }}
                 Configurazione
             </button>
 
+            <a
+                href="{% url 'monitor_charts' monitor.id %}"
+                class="btn btn-outline-primary rounded-pill">
+                <i class="bi bi-graph-up me-1"></i>
+                Analisi grafici
+            </a>
+
             <a href="{% url 'monitor_edit' monitor.id %}"
                class="btn btn-primary rounded-pill">
                 Modifica

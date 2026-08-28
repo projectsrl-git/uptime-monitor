@@ -90,3 +90,18 @@ def monitor_detail(request, id):
             "monitor": serializer.data,
         },
     )
+
+
+def monitor_charts(request, id):
+
+    monitor = get_object_or_404(Monitor, id=id)
+
+    serializer = MonitorReadSerializer(monitor)
+
+    return render(
+        request,
+        "monitor_detail/monitor_charts.html",
+        {
+            "monitor": serializer.data,
+        },
+    )

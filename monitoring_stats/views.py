@@ -323,25 +323,80 @@ class MonitorStatisticsView(APIView):
         incident_data = (
             Incident.objects.filter(
                 monitor=monitor,
-                started_at__gte=period_start,
-                started_at__lte=now,
+                started_at__lt=now,
             )
-            .annotate(date=TruncDay("started_at"))
-            .values("date")
-            .annotate(count=Count("id"))
-            .order_by("date")
+            .filter(
+                Q(ended_at__isnull=True)
+                | Q(ended_at__gt=period_start)
+            )
+            .order_by("started_at")
         )
+
+        if period == "24h":
+            bucket = timedelta(hours=1)
+
+        elif period == "7d":
+            bucket = timedelta(hours=6)
+
+        elif period == "30d":
+            bucket = timedelta(days=1)
+
+        else:
+            bucket = timedelta(days=7)
+
 
         incidents_over_time = []
 
-        for item in incident_data:
+        current_start = period_start
+
+        while current_start < now:
+
+            current_end = min(
+                current_start + bucket,
+                now,
+            )
+
+            bucket_incidents = incident_data.filter(
+                started_at__lt=current_end
+            ).filter(
+                Q(ended_at__isnull=True)
+                | Q(ended_at__gt=current_start)
+            )
+
+            incident_count = 0
+            downtime_seconds = 0
+
+            for incident in bucket_incidents:
+
+                incident_start = max(
+                    incident.started_at,
+                    current_start,
+                )
+
+                incident_end = min(
+                    incident.ended_at or now,
+                    current_end,
+                )
+
+                if incident_end > incident_start:
+
+                    incident_count += 1
+
+                    downtime_seconds += int(
+                        (
+                            incident_end - incident_start
+                        ).total_seconds()
+                    )
 
             incidents_over_time.append(
                 {
-                    "date": item["date"],
-                    "count": item["count"],
+                    "date": current_start,
+                    "count": incident_count,
+                    "downtime_seconds": downtime_seconds,
                 }
             )
+
+            current_start = current_end
 
         # ==================================================
         # UPTIME NEL TEMPO

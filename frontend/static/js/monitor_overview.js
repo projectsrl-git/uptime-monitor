@@ -46,11 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
             updateSummary(data.summary);
             updateResponseTime(data.response_time);
 
-            updateUptimeChart(data.uptime);
-            updateResponseTimeChart(data.response_time_over_time);
-            updateChecksChart(data.checks);
-            updateIncidentsChart(data.incidents);
-
             updateCharts(data);
 
         } catch (error) {
@@ -128,6 +123,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateUptimeChart(data) {
 
+        const canvas = document.getElementById("uptime-chart");
+
+        if (!canvas) {
+            return;
+        }
+
         const labels = data.map(item =>
             formatDate(item.date, currentPeriod)
         );
@@ -140,81 +141,89 @@ document.addEventListener("DOMContentLoaded", () => {
             uptimeChart.destroy();
         }
 
-        uptimeChart = new Chart(
-            document.getElementById("uptime-chart"),
-            {
-                type: "line",
+        uptimeChart = new Chart(canvas, {
+            type: "line",
 
-                data: {
-                    labels: labels,
+            data: {
+                labels: labels,
 
-                    datasets: [
-                        {
-                            label: "Uptime",
-                            data: values,
+                datasets: [{
+                    label: "Uptime",
+                    data: values,
 
-                            tension: 0.3,
+                    tension: 0.35,
 
-                            pointRadius: 2,
-                            pointHoverRadius: 5,
+                    fill: true,
 
-                            spanGaps: false
-                        }
-                    ]
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+
+                    borderWidth: 2,
+
+                    spanGaps: false
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                interaction: {
+                    intersect: false,
+                    mode: "index"
                 },
 
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                scales: {
 
-                    interaction: {
-                        intersect: false,
-                        mode: "index"
-                    },
+                    y: {
+                        min: 0,
+                        max: 100,
 
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
+                        ticks: {
+                            maxTicksLimit: 5,
 
-                                    const value = context.raw;
-
-                                    if (value === null) {
-                                        return "Uptime: nessun dato";
-                                    }
-
-                                    return `Uptime: ${value.toFixed(2)}%`;
-                                }
+                            callback: function (value) {
+                                return `${value}%`;
                             }
-                        },
-
-                        legend: {
-                            display: false
                         }
                     },
 
-                    scales: {
-
-                        y: {
-                            title: {
-                                display: true,
-                                text: "Percentuale (%)",
-                            },
-                            min: 0,
-                            max: 100,
+                    x: {
+                        grid: {
+                            display: false
                         },
 
-                        x: {
-                            ticks: {
-                                autoSkip: true,
-                                maxTicksLimit: 12,
-                                maxRotation: 0
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 6,
+                            maxRotation: 0
+                        }
+                    }
+
+                },
+
+                plugins: {
+
+                    legend: {
+                        display: false
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+
+                                if (context.raw === null) {
+                                    return "Uptime: nessun dato";
+                                }
+
+                                return `Uptime: ${context.raw.toFixed(2)}%`;
                             }
                         }
                     }
+
                 }
             }
-        );
+        });
     }
 
 
@@ -308,8 +317,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 datasets: [{
                     label: "Response time",
                     data: values,
-                    tension: 0.3,
-                    fill: false,
+                    tension: 0.35,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    borderWidth: 2,
                     spanGaps: false
                 }]
             },
@@ -318,29 +329,59 @@ document.addEventListener("DOMContentLoaded", () => {
                 responsive: true,
                 maintainAspectRatio: false,
 
+                interaction: {
+                    intersect: false,
+                    mode: "index"
+                },
+
                 scales: {
+
                     y: {
                         beginAtZero: true,
+
+                        ticks: {
+                            maxTicksLimit: 5
+                        },
 
                         title: {
                             display: true,
                             text: "Millisecondi (ms)"
                         }
                     },
-                    
+
                     x: {
+                        grid: {
+                            display: false
+                        },
+
                         ticks: {
                             autoSkip: true,
-                            maxTicksLimit: 12,
+                            maxTicksLimit: 6,
                             maxRotation: 0
                         }
                     }
+
                 },
 
                 plugins: {
+
                     legend: {
                         display: false
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+
+                                if (context.raw === null) {
+                                    return "Response time: nessun dato";
+                                }
+
+                                return `Response time: ${context.raw} ms`;
+                            }
+                        }
                     }
+
                 }
             }
         });
@@ -445,11 +486,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 datasets: [
                     {
                         label: "Riusciti",
-                        data: successfulValues
+                        data: successfulValues,
+                        borderWidth: 0,
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.8
                     },
                     {
                         label: "Falliti",
-                        data: failedValues
+                        data: failedValues,
+                        borderWidth: 0,
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.8
                     }
                 ]
             },
@@ -459,10 +506,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 maintainAspectRatio: false,
 
                 scales: {
+
                     y: {
                         beginAtZero: true,
 
                         ticks: {
+                            maxTicksLimit: 5,
                             precision: 0
                         },
 
@@ -473,12 +522,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     },
 
                     x: {
+                        grid: {
+                            display: false
+                        },
+
                         ticks: {
                             autoSkip: true,
-                            maxTicksLimit: 12,
+                            maxTicksLimit: 6,
                             maxRotation: 0
                         }
                     }
+
                 },
 
                 plugins: {
@@ -589,7 +643,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     backgroundColor: "rgba(220, 53, 69, 0.7)",
                     borderColor: "rgba(220, 53, 69, 1)",
-                    borderWidth: 1
+
+                    borderWidth: 0,
+
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.8
                 }]
             },
 
@@ -598,10 +656,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 maintainAspectRatio: false,
 
                 scales: {
+
                     y: {
                         beginAtZero: true,
 
                         ticks: {
+                            maxTicksLimit: 5,
                             precision: 0
                         },
 
@@ -612,12 +672,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     },
 
                     x: {
+                        grid: {
+                            display: false
+                        },
+
                         ticks: {
                             autoSkip: true,
-                            maxTicksLimit: 12,
+                            maxTicksLimit: 6,
                             maxRotation: 0
                         }
                     }
+
                 },
 
                 plugins: {
