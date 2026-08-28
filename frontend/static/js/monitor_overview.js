@@ -671,7 +671,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return "-";
         }
 
-        return `${value} ms`;
+        return `${value}ms`;
     }
 
 
@@ -682,7 +682,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (seconds === 0) {
-            return "0 secondi";
+            return "0s";
         }
 
         const days = Math.floor(seconds / 86400);

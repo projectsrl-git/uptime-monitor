@@ -7,129 +7,94 @@ Monitor #{{ monitor.id }}
 
 {% block content %}
 
-<div class="container py-5">
+<div class="container py-4">
 
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-start mb-4">
+    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-3">
+
         <div>
-            <h1 class="mb-4">
-                {{ monitor.name }}
-            </h1>
+            <h1 class="mb-2">{{ monitor.name }}</h1>
 
-            <!-- badge -->
             <div class="d-flex flex-wrap gap-2 align-items-center">
-                <span class="text-muted small">
-                    Badge:
-                </span>
-
                 {% if monitor.badges %}
                     {% for badge in monitor.badges %}
                         <span class="badge rounded-pill text-bg-secondary px-3 py-2">
                             {{ badge }}
                         </span>
                     {% endfor %}
-                {% else %}
-                    <span class="text-muted small">
-                        Nessun badge
-                    </span>
                 {% endif %}
             </div>
         </div>
 
-        <!-- pulsanti -->
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
 
-            <!-- modifica -->
+            <button
+                type="button"
+                id="configuration-tab"
+                class="btn btn-outline-primary rounded-pill">
+                Configurazione
+            </button>
+
             <a href="{% url 'monitor_edit' monitor.id %}"
                class="btn btn-primary rounded-pill">
                 Modifica
             </a>
 
-            <!-- duplica -->
-            <button
-                type="button"
-                id="duplicate-monitor-btn"
-                class="btn btn-primary rounded-pill"
-                data-monitor-id="{{ monitor.id }}"
-                data-success-url="{% url 'dashboard' %}">
+            <button id="duplicate-monitor-btn"
+                    class="btn btn-primary rounded-pill"
+                    data-monitor-id="{{ monitor.id }}"
+                    data-success-url="{% url 'dashboard' %}">
                 Duplica
             </button>
 
-            <!-- disattiva/attiva -->
             {% if monitor.is_active %}
-
-                <button
-                    type="button"
-                    id="deactivate-monitor-btn"
-                    class="btn btn-outline-danger rounded-pill"
-                    data-monitor-id="{{ monitor.id }}">
-                    <i class="bi bi-pause-circle me-1"></i>
+                <button id="deactivate-monitor-btn"
+                        class="btn btn-outline-danger rounded-pill"
+                        data-monitor-id="{{ monitor.id }}">
                     Disattiva
                 </button>
-
             {% else %}
-
-                <button
-                    type="button"
-                    id="activate-monitor-btn"
-                    class="btn btn-outline-success rounded-pill"
-                    data-monitor-id="{{ monitor.id }}">
-                    <i class="bi bi-play-circle me-1"></i>
+                <button id="activate-monitor-btn"
+                        class="btn btn-outline-success rounded-pill"
+                        data-monitor-id="{{ monitor.id }}">
                     Attiva
                 </button>
-
             {% endif %}
 
         </div>
+
     </div>
 
+    <div class="card shadow-sm mb-3">
 
-    <!-- STATO ATTUALE -->
-    <div class="card shadow-sm mb-4">
         <div class="card-header">
-            <h5 class="mb-0">
-                Stato attuale
-            </h5>
+            <h6 class="mb-0">Stato attuale</h6>
         </div>
 
         <div class="card-body">
+
             <div class="row text-center">
 
-                <div class="col-md-3 border-end">
-                    <div class="text-muted small">
-                        Stato
-                    </div>
-
-                    <div class="fw-semibold mt-1">
+                <div class="col-6 col-lg-3 border-end">
+                    <div class="text-muted small">Stato</div>
+                    <div class="mt-1">
                         {% if monitor.status == "up" %}
-                            <span class="badge bg-success rounded-pill px-3 py-2 fw-bold">
-                                UP
-                            </span>
+                            <span class="badge bg-success rounded-pill px-3 py-2">UP</span>
                         {% elif monitor.status == "down" %}
-                            <span class="badge bg-danger rounded-pill px-3 py-2 fw-bold">
-                                DOWN
-                            </span>
+                            <span class="badge bg-danger rounded-pill px-3 py-2">DOWN</span>
                         {% elif monitor.status == "paused" %}
-                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-bold">
-                                PAUSED
-                            </span>
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2">PAUSED</span>
                         {% else %}
-                            <span class="badge bg-secondary text-dark rounded-pill px-3 py-2 fw-bold">
-                                NOT STARTED
-                            </span>
+                            <span class="badge bg-secondary rounded-pill px-3 py-2">NOT STARTED</span>
                         {% endif %}
                     </div>
                 </div>
 
-                <div class="col-md-3 border-end">
-                    <div class="text-muted small">
-                        Ultimo check
-                    </div>
-
-                    <div class="fw-semibold">
+                <div class="col-6 col-lg-3 border-end">
+                    <div class="text-muted small">Ultimo check</div>
+                    <div class="mt-1">
                         {% if monitor.last_check_at %}
                             <span data-date="{{ monitor.last_check_at|date:'c' }}">
-                                {{ monitor.last_check_at}}
+                                {{ monitor.last_check_at }}
                             </span>
                         {% else %}
                             -
@@ -137,13 +102,10 @@ Monitor #{{ monitor.id }}
                     </div>
                 </div>
 
-                <div class="col-md-3 border-end">
-                    <div class="text-muted small">
-                        Ultima risposta
-                    </div>
-
-                    <div class="fw-semibold mt-1">
-                        {% if monitor.last_response_time_ms is not None %}
+                <div class="col-6 col-lg-3 border-end mt-3 mt-lg-0">
+                    <div class="text-muted small">Ultima risposta</div>
+                    <div class="mt-1">
+                        {% if monitor.last_response_time_ms %}
                             {{ monitor.last_response_time_ms }} ms
                         {% else %}
                             -
@@ -151,64 +113,35 @@ Monitor #{{ monitor.id }}
                     </div>
                 </div>
 
-                <div class="col-md-3">
-                    <div class="text-muted small">
-                        Attivo
-                    </div>
-
-                    <div class="fw-semibold mt-1">
+                <div class="col-6 col-lg-3 mt-3 mt-lg-0">
+                    <div class="text-muted small">Attivo</div>
+                    <div class="mt-1">
                         {% if monitor.is_active %}
-                            <span class="badge bg-success rounded-pill px-3 py-2">
-                                Sì
-                            </span>
+                            <span class="badge bg-success rounded-pill px-3 py-2">Sì</span>
                         {% else %}
-                            <span class="badge bg-secondary rounded-pill px-3 py-2">
-                                No
-                            </span>
+                            <span class="badge bg-secondary rounded-pill px-3 py-2">No</span>
                         {% endif %}
                     </div>
                 </div>
 
             </div>
+
         </div>
-    </div>
-
-
-    <!-- SCHEDE -->
-    <div class="d-flex gap-2 mb-4 justify-content-center">
-
-        <button
-            type="button"
-            id="overview-tab"
-            class="btn btn-primary rounded-pill">
-            Panoramica
-        </button>
-
-        <button
-            type="button"
-            id="configuration-tab"
-            class="btn btn-outline-primary rounded-pill">
-            Configurazione
-        </button>
 
     </div>
 
-
-    <!-- PANORAMICA -->
     <div id="overview-content">
         {% include "monitor_detail/overview.html" %}
     </div>
 
-
-    <!-- CONFIGURAZIONE -->
     <div id="configuration-content" class="d-none">
         {% include "monitor_detail/configuration.html" %}
     </div>
-    
+
     <script>
         const monitorId = {{ monitor.id }};
     </script>
-    
+
 </div>
 
 {% endblock %}

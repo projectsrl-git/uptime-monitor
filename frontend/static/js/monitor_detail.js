@@ -125,12 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // schede
-    const overviewTab = document.getElementById(
-        "overview-tab"
-    );
-
-    const configurationTab = document.getElementById(
+    const configurationButton = document.getElementById(
         "configuration-tab"
     );
 
@@ -144,36 +139,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     if (
-        overviewTab &&
-        configurationTab &&
+        configurationButton &&
         overviewContent &&
         configurationContent
     ) {
 
-        overviewTab.addEventListener("click", () => {
+        configurationButton.addEventListener("click", () => {
 
-            overviewContent.classList.remove("d-none");
-            configurationContent.classList.add("d-none");
-
-            overviewTab.classList.remove("btn-outline-primary");
-            overviewTab.classList.add("btn-primary");
-
-            configurationTab.classList.remove("btn-primary");
-            configurationTab.classList.add("btn-outline-primary");
-
-        });
+            const configurationVisible =
+                !configurationContent.classList.contains("d-none");
 
 
-        configurationTab.addEventListener("click", () => {
+            if (configurationVisible) {
 
-            configurationContent.classList.remove("d-none");
-            overviewContent.classList.add("d-none");
+                // Torna alle statistiche
 
-            configurationTab.classList.remove("btn-outline-primary");
-            configurationTab.classList.add("btn-primary");
+                configurationContent.classList.add("d-none");
+                overviewContent.classList.remove("d-none");
 
-            overviewTab.classList.remove("btn-primary");
-            overviewTab.classList.add("btn-outline-primary");
+                configurationButton.textContent = "Configurazione";
+
+                configurationButton.classList.remove(
+                    "btn-primary"
+                );
+                
+                configurationButton.classList.add(
+                    "btn-outline-primary"
+                );
+
+            } else {
+
+                // Mostra configurazione
+
+                overviewContent.classList.add("d-none");
+                configurationContent.classList.remove("d-none");
+
+                configurationButton.textContent = "Statistiche";
+
+                configurationButton.classList.remove(
+                    "btn-primary"
+                );
+                
+                configurationButton.classList.add(
+                    "btn-outline-primary"
+                );
+
+            }
 
         });
 
