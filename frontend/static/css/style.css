@@ -334,8 +334,6 @@ body.dashboard-page, body.incidents-page {
     overflow: hidden;
 }
 
-/* header */
-
 .general-statistics .card-header {
     background: rgba(255, 255, 255, 0.035);
     border-bottom: 1px solid #495057;
@@ -347,8 +345,6 @@ body.dashboard-page, body.incidents-page {
     font-weight: 600;
     color: #f8f9fa;
 }
-
-/* periodo */
 
 .stats-period {
     padding: 2px;
@@ -381,8 +377,6 @@ body.dashboard-page, body.incidents-page {
     box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
 }
 
-/* singola statistica */
-
 .general-stat-item {
     position: relative;
     padding: 10px 4px 10px 12px;
@@ -412,8 +406,6 @@ body.dashboard-page, body.incidents-page {
     font-size: 1.05rem;
     font-weight: 600;
 }
-
-/* valore principale */
 
 #stats-uptime {
     font-size: 1.15rem;
@@ -479,4 +471,134 @@ body.dashboard-page, body.incidents-page {
     transition:
         background-color .15s ease,
         border-color .15s ease;
+}
+
+/********************/
+/* MONITOR STATUS   */
+/********************/
+
+.monitor-status-period {
+    padding: 4px;
+}
+
+.monitor-status-period .btn {
+    min-width: 100px;
+    padding: .55rem 1rem;
+    font-size: .85rem;
+}
+
+.status-summary {
+    color: #adb5bd;
+    font-size: .9rem;
+    font-weight: 500;
+}
+
+#status-title {
+    font-size: 1.6rem;
+    letter-spacing: -.02em;
+}
+
+#status-title.status-operational {
+    color: #17b932;
+}
+
+#status-title.status-warning {
+    color: #ffc107;
+}
+
+#status-title.status-danger {
+    color: #dc3545;
+}
+
+.monitor-status-card {
+    height: 100%;
+}
+
+.monitor-status-body {
+    padding: .6rem .8rem;
+}
+
+.monitor-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    min-height: 28px;
+}
+
+.monitor-status-name {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: .5rem;
+}
+
+.monitor-status-name-text {
+    min-width: 0;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-weight: 600;
+}
+
+.monitor-status-dot {
+    width: 8px;
+    height: 8px;
+    min-width: 8px;
+
+    flex-shrink: 0;
+
+    display: inline-block;
+
+    border-radius: 50%;
+
+    transform: translateY(2px);
+}
+
+.monitor-status-dot.status-up {
+    background-color: #17b932;
+}
+
+.monitor-status-dot.status-down {
+    background-color: #dc3545;
+}
+
+.monitor-status-dot.status-paused {
+    background-color: #ffc107;
+}
+
+.monitor-status-dot.status-not-started {
+    background-color: #6c757d;
+}
+
+.monitor-status-uptime {
+    flex-shrink: 0;
+
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.monitor-status-uptime-card {
+    background-color: #2b3035;
+    border: 1px solid #495057;
+    border-radius: 8px;
+    padding: .6rem .75rem;
+}
+
+.monitor-status-uptime-label {
+    color: #868e96;
+    font-size: .7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: .2rem;
+}
+
+.monitor-status-uptime-value {
+    font-size: 1.15rem;
+    font-weight: 700;
 }

@@ -10,12 +10,92 @@ Monitor Status
 
 {% block content %}
 
-<div class="container py-4">
+<div class="container-fluid px-4 py-3">
+
+    <!-- HEADER -->
+    <div class="text-center mb-4">
+
+        <h2
+            id="status-title"
+            class="fw-semibold mb-1">
+            Caricamento...
+        </h2>
+
+        <div
+            id="status-summary"
+            class="status-summary mb-4">
+            Caricamento stato sistemi...
+        </div>
+
+        <div class="row justify-content-center g-2 mb-4">
+
+            <div class="col-6 col-sm-3">
+                <div class="monitor-status-uptime-card text-center">
+                    <div class="monitor-status-uptime-label">
+                        24 ore
+                    </div>
+
+                    <div
+                        id="uptime-24h"
+                        class="monitor-status-uptime-value">
+                        -
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-sm-3">
+                <div class="monitor-status-uptime-card text-center">
+                    <div class="monitor-status-uptime-label">
+                        7 giorni
+                    </div>
+
+                    <div
+                        id="uptime-7d"
+                        class="monitor-status-uptime-value">
+                        -
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-sm-3">
+                <div class="monitor-status-uptime-card text-center">
+                    <div class="monitor-status-uptime-label">
+                        30 giorni
+                    </div>
+
+                    <div
+                        id="uptime-30d"
+                        class="monitor-status-uptime-value">
+                        -
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-sm-3">
+                <div class="monitor-status-uptime-card text-center">
+                    <div class="monitor-status-uptime-label">
+                        365 giorni
+                    </div>
+
+                    <div
+                        id="uptime-365d"
+                        class="monitor-status-uptime-value">
+                        -
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
 
     <!-- PERIODO -->
-    <div class="d-flex justify-content-center mb-3">
+    <div class="d-flex justify-content-center mb-4">
 
-        <div class="btn-group btn-group-sm stats-period" role="group">
+        <div
+            class="btn-group stats-period monitor-status-period"
+            role="group">
 
             <button
                 type="button"
@@ -53,7 +133,7 @@ Monitor Status
     <!-- MONITOR -->
     <div
         id="monitor-status-list"
-        class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-2">
+        class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-2">
     </div>
 
 </div>

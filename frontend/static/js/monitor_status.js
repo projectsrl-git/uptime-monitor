@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     loadMonitors();
+    loadTotalUptimes();
 
 
     document
@@ -63,6 +64,8 @@ async function loadMonitors() {
             "/api/monitors/"
         );
 
+        updateStatusSummary(monitors);
+
         const results = await Promise.all(
             monitors.map(async monitor => {
 
@@ -113,7 +116,6 @@ function renderMonitors(monitors) {
 
     container.innerHTML = "";
 
-
     if (monitors.length === 0) {
 
         container.innerHTML = `
@@ -127,10 +129,8 @@ function renderMonitors(monitors) {
         return;
     }
 
-
     const fragment =
         document.createDocumentFragment();
-
 
     monitors.forEach(monitor => {
 
@@ -141,47 +141,60 @@ function renderMonitors(monitors) {
             document.createElement("div");
 
         card.className =
-            "card shadow-sm h-100";
+            "card shadow-sm h-100 monitor-status-card";
 
 
         const body =
             document.createElement("div");
 
         body.className =
-            "card-body py-2 px-3";
+            "card-body monitor-status-body";
 
 
         const row =
             document.createElement("div");
 
         row.className =
-            "d-flex justify-content-between align-items-center gap-2";
+            "monitor-status-row";
 
 
         const nameContainer =
             document.createElement("div");
 
         nameContainer.className =
-            "d-flex align-items-center gap-2 text-truncate";
+            "monitor-status-name";
 
 
         const status =
             document.createElement("span");
 
         status.className =
-            getStatusClass(monitor.status);
+            "monitor-status-dot";
 
-        status.style.width = "8px";
-        status.style.height = "8px";
-        status.style.minWidth = "8px";
-        status.style.borderRadius = "50%";
+
+        if (monitor.status === "up") {
+
+            status.classList.add("status-up");
+
+        } else if (monitor.status === "down") {
+
+            status.classList.add("status-down");
+
+        } else if (monitor.status === "paused") {
+
+            status.classList.add("status-paused");
+
+        } else {
+
+            status.classList.add("status-not-started");
+        }
 
 
         const name =
             document.createElement("span");
 
         name.className =
-            "fw-semibold text-truncate";
+            "monitor-status-name-text";
 
         name.textContent =
             monitor.name;
@@ -191,7 +204,7 @@ function renderMonitors(monitors) {
             document.createElement("span");
 
         uptime.className =
-            "fw-semibold text-nowrap";
+            "monitor-status-uptime";
 
 
         if (monitor.uptime === null) {
@@ -214,7 +227,6 @@ function renderMonitors(monitors) {
             } else {
 
                 uptime.classList.add("uptime-high");
-
             }
         }
 
@@ -233,28 +245,170 @@ function renderMonitors(monitors) {
 
     });
 
-
     container.appendChild(fragment);
 }
 
 
-function getStatusClass(status) {
+function updateStatusSummary(monitors) {
 
-    switch (status) {
+    const titleElement =
+        document.getElementById("status-title");
 
-        case "up":
-            return "bg-success";
+    const summaryElement =
+        document.getElementById("status-summary");
 
-        case "down":
-            return "bg-danger";
-
-        case "paused":
-            return "bg-warning";
-
-        case "not_started":
-            return "bg-secondary";
-
-        default:
-            return "bg-secondary";
+    if (!titleElement || !summaryElement) {
+        return;
     }
+
+    const total = monitors.length;
+
+    const up = monitors.filter(
+        monitor => monitor.status === "up"
+    ).length;
+
+    const down = monitors.filter(
+        monitor => monitor.status === "down"
+    ).length;
+
+    const paused = monitors.filter(
+        monitor => monitor.status === "paused"
+    ).length;
+
+    const notStarted = monitors.filter(
+        monitor => monitor.status === "not_started"
+    ).length;
+
+
+    titleElement.classList.remove(
+        "status-operational",
+        "status-warning",
+        "status-danger"
+    );
+
+
+    if (
+        total > 0 &&
+        up === total
+    ) {
+
+        titleElement.textContent =
+            "Tutto operativo";
+
+        titleElement.classList.add(
+            "status-operational"
+        );
+
+        summaryElement.textContent =
+            "Tutti i sistemi stanno funzionando correttamente";
+
+        return;
+    }
+
+
+    if (down > 0) {
+
+        titleElement.textContent =
+            "Problemi rilevati";
+
+        titleElement.classList.add(
+            "status-danger"
+        );
+
+    } else {
+
+        titleElement.textContent =
+            "Stato dei sistemi";
+
+        titleElement.classList.add(
+            "status-warning"
+        );
+    }
+
+
+    const parts = [];
+
+    parts.push(
+        `${up} di ${total} operativi`
+    );
+
+    if (down > 0) {
+        parts.push(
+            `${down} non operativi`
+        );
+    }
+
+    if (paused > 0) {
+        parts.push(
+            `${paused} in pausa`
+        );
+    }
+
+    if (notStarted > 0) {
+        parts.push(
+            `${notStarted} non avviati`
+        );
+    }
+
+
+    summaryElement.textContent =
+        parts.join(" · ");
+}
+
+async function loadTotalUptimes() {
+
+    const periods = [
+        "24h",
+        "7d",
+        "30d",
+        "365d"
+    ];
+
+    const results = await Promise.all(
+        periods.map(period =>
+            apiFetch(
+                `/api/statistics/?period=${period}`
+            )
+        )
+    );
+
+    periods.forEach((period, index) => {
+
+        const element =
+            document.getElementById(
+                `uptime-${period}`
+            );
+
+        const uptime =
+            results[index].uptime_percentage;
+
+        if (uptime === null) {
+
+            element.textContent = "N/D";
+
+            return;
+        }
+
+        element.textContent =
+            `${uptime.toFixed(2)}%`;
+
+        element.classList.remove(
+            "uptime-low",
+            "uptime-medium",
+            "uptime-high"
+        );
+
+        if (uptime < 80) {
+
+            element.classList.add("uptime-low");
+
+        } else if (uptime < 90) {
+
+            element.classList.add("uptime-medium");
+
+        } else {
+
+            element.classList.add("uptime-high");
+        }
+    });
 }
