@@ -8,6 +8,7 @@ from .views import (
     monitor_detail,
     edit_monitor_page,
     monitor_charts,
+    monitor_status,
 )
 
 urlpatterns = [
@@ -18,4 +19,6 @@ urlpatterns = [
     path("monitor/<int:id>/charts/", monitor_charts, name="monitor_charts",),
     path("incidents/", incidents_page, name="incidents"),
     path("incidents/<int:id>/", incident_detail, name="incident_detail"),
+    path("monitor-status/", monitor_status, name="monitor_status",
+    ),
 ]

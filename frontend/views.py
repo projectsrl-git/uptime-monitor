@@ -105,3 +105,10 @@ def monitor_charts(request, id):
             "monitor": serializer.data,
         },
     )
+
+
+def monitor_status(request):
+    return render(
+        request,
+        "monitor_status.html",
+    )

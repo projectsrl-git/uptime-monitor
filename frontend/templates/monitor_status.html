@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block navbar %}
+{% endblock %}
+
+{% block title %}
+Monitor Status
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <!-- PERIODO -->
+    <div class="d-flex justify-content-center mb-3">
+
+        <div class="btn-group btn-group-sm stats-period" role="group">
+
+            <button
+                type="button"
+                class="btn active statistics-period"
+                data-period="24h">
+                24 ore
+            </button>
+
+            <button
+                type="button"
+                class="btn statistics-period"
+                data-period="7d">
+                7 giorni
+            </button>
+
+            <button
+                type="button"
+                class="btn statistics-period"
+                data-period="30d">
+                30 giorni
+            </button>
+
+            <button
+                type="button"
+                class="btn statistics-period"
+                data-period="365d">
+                365 giorni
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- MONITOR -->
+    <div
+        id="monitor-status-list"
+        class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-2">
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/monitor_status.js' %}"></script>
+{% endblock %}

@@ -18,7 +18,9 @@
     </head>
 
     <body class="{% block body_class %}{% endblock %}">
-        {% include "navbar.html" %}
+        {% block navbar %}
+            {% include "navbar.html" %}
+        {% endblock %}
         {% block content %}
         {% endblock %}
 

@@ -85,6 +85,18 @@ body.dashboard-page, body.incidents-page {
     color: #17b932 !important;
 }
 
+.uptime-low {
+    color: #dc3545 !important;
+}
+
+.uptime-medium {
+    color: #ffc107 !important;
+}
+
+.uptime-high {
+    color: #17b932 !important;
+}
+
 
 /*************/
 /* DASHBOARD */
