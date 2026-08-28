@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Monitor #{{ monitor.id }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-3">
+
+        <div>
+            <h1 class="mb-2">{{ monitor.name }}</h1>
+
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                {% if monitor.badges %}
+                    {% for badge in monitor.badges %}
+                        <span class="badge rounded-pill text-bg-secondary px-3 py-2">
+                            {{ badge }}
+                        </span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+
+            <button
+                type="button"
+                id="configuration-tab"
+                class="btn btn-outline-primary rounded-pill">
+                Configurazione
+            </button>
+
+            <a
+                href="{% url 'monitor_charts' monitor.id %}"
+                class="btn btn-outline-primary rounded-pill">
+                <i class="bi bi-graph-up me-1"></i>
+                Analisi grafici
+            </a>
+
+            <a href="{% url 'monitor_edit' monitor.id %}"
+               class="btn btn-outline-warning rounded-pill">
+                Modifica
+            </a>
+
+            <button id="duplicate-monitor-btn"
+                    class="btn btn-outline-warning rounded-pill"
+                    data-monitor-id="{{ monitor.id }}"
+                    data-success-url="{% url 'dashboard' %}">
+                Duplica
+            </button>
+
+            {% if monitor.is_active %}
+                <button id="deactivate-monitor-btn"
+                        class="btn btn-outline-danger rounded-pill"
+                        data-monitor-id="{{ monitor.id }}">
+                    Disattiva
+                </button>
+            {% else %}
+                <button id="activate-monitor-btn"
+                        class="btn btn-outline-success rounded-pill"
+                        data-monitor-id="{{ monitor.id }}">
+                    Attiva
+                </button>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm mb-3">
+
+        <div class="card-header">
+            <h6 class="mb-0">Stato attuale</h6>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row text-center">
+
+                <div class="col-6 col-lg-3 border-end">
+                    <div class="text-muted small">Stato</div>
+                    <div class="mt-1">
+                        {% if monitor.status == "up" %}
+                            <span class="badge bg-success rounded-pill px-3 py-2">UP</span>
+                        {% elif monitor.status == "down" %}
+                            <span class="badge bg-danger rounded-pill px-3 py-2">DOWN</span>
+                        {% elif monitor.status == "paused" %}
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2">PAUSED</span>
+                        {% else %}
+                            <span class="badge bg-secondary rounded-pill px-3 py-2">NOT STARTED</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-3 border-end">
+                    <div class="text-muted small">Ultimo check</div>
+                    <div class="mt-1">
+                        {% if monitor.last_check_at %}
+                            <span data-date="{{ monitor.last_check_at|date:'c' }}">
+                                {{ monitor.last_check_at }}
+                            </span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-3 border-end mt-3 mt-lg-0">
+                    <div class="text-muted small">Ultima risposta</div>
+                    <div class="mt-1">
+                        {% if monitor.last_response_time_ms %}
+                            {{ monitor.last_response_time_ms }} ms
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-3 mt-3 mt-lg-0">
+                    <div class="text-muted small">Attivo</div>
+                    <div class="mt-1">
+                        {% if monitor.is_active %}
+                            <span class="badge bg-success rounded-pill px-3 py-2">Sì</span>
+                        {% else %}
+                            <span class="badge bg-secondary rounded-pill px-3 py-2">No</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="overview-content">
+        {% include "monitor_detail/overview.html" %}
+    </div>
+
+    <div id="configuration-content" class="d-none">
+        {% include "monitor_detail/configuration.html" %}
+    </div>
+
+    <script>
+        const monitorId = {{ monitor.id }};
+    </script>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/monitor_detail.js' %}"></script>
+<script src="{% static 'js/monitor_overview.js' %}"></script>
+{% endblock %}
