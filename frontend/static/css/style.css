@@ -676,3 +676,24 @@ body.incidents-page {
         background-color .15s ease,
         border-color .15s ease;
 }
+
+/*****************/
+/* CHECKS FILTER */
+/*****************/
+
+.checks-filters {
+    background-color: #2b3035;
+}
+
+.checks-filter-label {
+    display: block;
+    margin-bottom: .3rem;
+
+    color: #868e96;
+
+    font-size: .72rem;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}

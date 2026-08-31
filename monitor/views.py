@@ -1,3 +1,6 @@
+from datetime import datetime, time
+from django.utils import timezone
+
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -287,13 +290,35 @@ class MonitorCheckHistoryView(APIView):
             )
 
         if from_date:
+            from_datetime = datetime.combine(
+                from_date,
+                time.min,
+            )
+
+            if timezone.is_naive(from_datetime):
+                from_datetime = timezone.make_aware(
+                    from_datetime,
+                    timezone.get_current_timezone(),
+                )
+
             checks = checks.filter(
-                executed_at__gte=from_date,
+                executed_at__gte=from_datetime,
             )
 
         if to_date:
+            to_datetime = datetime.combine(
+                to_date,
+                time.max,
+            )
+
+            if timezone.is_naive(to_datetime):
+                to_datetime = timezone.make_aware(
+                    to_datetime,
+                    timezone.get_current_timezone(),
+                )
+
             checks = checks.filter(
-                executed_at__lte=to_date,
+                executed_at__lte=to_datetime,
             )
 
         # ==========================

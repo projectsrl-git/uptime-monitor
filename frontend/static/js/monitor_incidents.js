@@ -1,5 +1,8 @@
 let currentPage = 1;
 
+let dateFrom = "";
+let dateTo = "";
+
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -8,6 +11,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const statusFilter =
         document.getElementById("status-filter");
+
+    const fromDate =
+        document.getElementById("from-date");
+
+    const toDate =
+        document.getElementById("to-date");
+
+    const applyDateFilter =
+        document.getElementById("apply-date-filter");
+
+    const clearDateFilter =
+        document.getElementById("clear-date-filter");
 
 
     orderingSelect.addEventListener(
@@ -21,6 +36,36 @@ document.addEventListener("DOMContentLoaded", () => {
     statusFilter.addEventListener(
         "change",
         () => {
+            loadIncidents(1);
+        }
+    );
+
+
+    applyDateFilter.addEventListener(
+        "click",
+        () => {
+
+            dateFrom =
+                fromDate.value;
+
+            dateTo =
+                toDate.value;
+
+            loadIncidents(1);
+        }
+    );
+
+
+    clearDateFilter.addEventListener(
+        "click",
+        () => {
+
+            fromDate.value = "";
+            toDate.value = "";
+
+            dateFrom = "";
+            dateTo = "";
+
             loadIncidents(1);
         }
     );
@@ -49,18 +94,15 @@ async function loadIncidents(page = 1) {
 
     currentPage = page;
 
-
     const tableBody =
         document.getElementById(
             "incident-table-body"
         );
 
-
     const ordering =
         document.getElementById(
             "ordering-incident"
         ).value;
-
 
     const status =
         document.getElementById(
@@ -89,19 +131,43 @@ async function loadIncidents(page = 1) {
     );
 
 
+    if (dateFrom) {
+
+        params.set(
+            "from",
+            dateFrom
+        );
+
+    }
+
+
+    if (dateTo) {
+
+        params.set(
+            "to",
+            dateTo
+        );
+
+    }
+
+
     if (ordering) {
+
         params.set(
             "ordering",
             ordering
         );
+
     }
 
 
     if (status) {
+
         params.set(
             "status",
             status
         );
+
     }
 
 
@@ -135,7 +201,6 @@ async function loadIncidents(page = 1) {
                 </td>
             </tr>
         `;
-
     }
 }
 

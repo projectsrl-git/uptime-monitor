@@ -1,5 +1,7 @@
 let currentPage = 1;
 
+let dateFrom = "";
+let dateTo = "";
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -8,6 +10,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const successFilter =
         document.getElementById("success-filter");
+
+    const fromDate =
+        document.getElementById("from-date");
+
+    const toDate =
+        document.getElementById("to-date");
+
+    const applyDateFilter =
+        document.getElementById("apply-date-filter");
+
+    const clearDateFilter =
+        document.getElementById("clear-date-filter");
 
 
     orderingSelect.addEventListener(
@@ -21,6 +35,33 @@ document.addEventListener("DOMContentLoaded", () => {
     successFilter.addEventListener(
         "change",
         () => {
+            loadChecks(1);
+        }
+    );
+
+
+    applyDateFilter.addEventListener(
+        "click",
+        () => {
+
+            dateFrom = fromDate.value;
+            dateTo = toDate.value;
+
+            loadChecks(1);
+        }
+    );
+
+
+    clearDateFilter.addEventListener(
+        "click",
+        () => {
+
+            fromDate.value = "";
+            toDate.value = "";
+
+            dateFrom = "";
+            dateTo = "";
+
             loadChecks(1);
         }
     );
@@ -83,6 +124,24 @@ async function loadChecks(page = 1) {
         "page",
         page
     );
+
+    if (dateFrom) {
+
+        params.set(
+            "from",
+            dateFrom
+        );
+
+    }
+
+    if (dateTo) {
+
+        params.set(
+            "to",
+            dateTo
+        );
+
+    }
 
 
     if (ordering) {
