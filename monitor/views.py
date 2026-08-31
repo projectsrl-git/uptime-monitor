@@ -363,6 +363,18 @@ class MonitorCheckHistoryView(APIView):
 
 class MonitorIncidentHistoryView(APIView):
 
+    VALID_ORDERING = (
+        "started_at",
+        "-started_at",
+        "duration_seconds",
+        "-duration_seconds",
+    )
+
+    VALID_STATUS = (
+        "active",
+        "resolved",
+    )
+
     def get(self, request, pk):
 
         try:
@@ -376,31 +388,97 @@ class MonitorIncidentHistoryView(APIView):
 
         incidents = monitor.incidents.all()
 
+        # ==========================
+        # FILTRO DATA
+        # ==========================
+
         try:
+
             from_date = parse_date(request.query_params.get("from"))
 
             to_date = parse_date(request.query_params.get("to"))
 
         except ValueError as e:
+
             return Response(
                 {"detail": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         if from_date and to_date:
+
             incidents = incidents.filter(
                 started_at__lte=to_date,
             ).filter(Q(ended_at__gte=from_date) | Q(ended_at__isnull=True))
 
         elif from_date:
+
             incidents = incidents.filter(
                 Q(ended_at__gte=from_date) | Q(ended_at__isnull=True)
             )
 
         elif to_date:
+
             incidents = incidents.filter(
                 started_at__lte=to_date,
             )
+
+        # ==========================
+        # FILTRO STATO
+        # ==========================
+
+        incident_status = request.query_params.get("status")
+
+        if incident_status is not None:
+
+            if incident_status not in self.VALID_STATUS:
+
+                return Response(
+                    {
+                        "detail": (
+                            "Valore non valido per 'status'. "
+                            "Valori consentiti: "
+                            f"{', '.join(self.VALID_STATUS)}"
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if incident_status == "active":
+
+                incidents = incidents.filter(ended_at__isnull=True)
+
+            elif incident_status == "resolved":
+
+                incidents = incidents.filter(ended_at__isnull=False)
+
+        # ==========================
+        # ORDINAMENTO
+        # ==========================
+
+        ordering = request.query_params.get(
+            "ordering",
+            "-started_at",
+        )
+
+        if ordering not in self.VALID_ORDERING:
+
+            return Response(
+                {
+                    "detail": (
+                        "Ordinamento non valido. "
+                        "Valori consentiti: "
+                        f"{', '.join(self.VALID_ORDERING)}"
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        incidents = incidents.order_by(ordering)
+
+        # ==========================
+        # PAGINAZIONE
+        # ==========================
 
         paginator = HistoryPagination()
 

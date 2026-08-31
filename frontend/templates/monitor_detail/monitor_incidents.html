@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Incidenti - {{ monitor.name }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="mb-1">
+                Incidenti
+            </h1>
+
+            <div class="text-muted">
+                {{ monitor.name }}
+            </div>
+        </div>
+
+        <a
+            href="{% url 'monitor_detail' monitor.id %}"
+            class="btn btn-outline-secondary rounded-pill">
+            Torna al monitor
+        </a>
+
+    </div>
+
+
+    <div class="row mb-3 align-items-center">
+
+        <!-- ordinamento -->
+        <div class="col-lg-4">
+            <select
+                id="ordering-incident"
+                class="form-select">
+
+                <option value="-started_at">
+                    Più recenti
+                </option>
+
+                <option value="started_at">
+                    Più vecchi
+                </option>
+
+                <option value="-duration_seconds">
+                    Durata maggiore
+                </option>
+
+                <option value="duration_seconds">
+                    Durata minore
+                </option>
+
+            </select>
+        </div>
+
+
+        <!-- filtro stato -->
+        <div class="col-lg-3">
+            <select
+                id="status-filter"
+                class="form-select">
+
+                <option value="">
+                    Tutti
+                </option>
+
+                <option value="active">
+                    Attivi
+                </option>
+
+                <option value="resolved">
+                    Risolti
+                </option>
+
+            </select>
+        </div>
+
+    </div>
+
+
+    <div class="card shadow-sm border-0">
+
+        <div class="table-responsive">
+
+            <div class="card-body p-0">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead>
+                        <tr>
+                            <th>Stato</th>
+                            <th>Inizio</th>
+                            <th>Fine</th>
+                            <th>Durata</th>
+                            <th>Causa</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="incident-table-body"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div
+        id="pagination"
+        class="d-flex justify-content-center mt-4">
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+
+<script>
+    const monitorId = {{ monitor.id }};
+</script>
+
+<script src="{% static 'js/monitor_incidents.js' %}"></script>
+
+{% endblock %}
