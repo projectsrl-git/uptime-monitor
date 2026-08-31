@@ -31,29 +31,7 @@ const searchInput = document.getElementById("search-monitor");
 const orderingSelect = document.getElementById("ordering-monitor");
 const statusFilter = document.getElementById("status-filter");
 const uptimePeriod = document.getElementById("uptime-period");
-let statisticsPeriod = "24h";
 
-document
-    .querySelectorAll(".stats-period button")
-    .forEach(button => {
-
-        button.addEventListener("click", async () => {
-
-            document
-                .querySelectorAll(".stats-period button")
-                .forEach(btn => {
-                    btn.classList.remove("active");
-                });
-
-            button.classList.add("active");
-
-            statisticsPeriod =
-                button.dataset.period;
-
-            await loadGeneralStatistics();
-        });
-
-    });
 
 const statistics = {
     total: document.getElementById("total-monitors"),
@@ -128,7 +106,12 @@ statusFilter.addEventListener(
 
 uptimePeriod.addEventListener(
     "change",
-    loadMonitors
+    async () => {
+
+        await loadMonitors();
+        await loadGeneralStatistics();
+
+    }
 );
 
 
@@ -498,7 +481,7 @@ async function loadGeneralStatistics() {
     try {
 
         const data = await apiFetch(
-            `/api/statistics/?period=${statisticsPeriod}`
+            `/api/statistics/?period=${uptimePeriod.value}`
         );
 
         const uptimeElement =
