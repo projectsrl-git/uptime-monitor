@@ -246,6 +246,18 @@ class MonitorUptimeView(APIView):
 
 class MonitorCheckHistoryView(APIView):
 
+    VALID_ORDERING = (
+        "executed_at",
+        "-executed_at",
+        "response_time_ms",
+        "-response_time_ms",
+    )
+
+    VALID_SUCCESS = (
+        "true",
+        "false",
+    )
+
     def get(self, request, pk):
 
         try:
@@ -258,6 +270,10 @@ class MonitorCheckHistoryView(APIView):
             )
 
         checks = monitor.checks.all()
+
+        # ==========================
+        # FILTRO DATA
+        # ==========================
 
         try:
             from_date = parse_date(request.query_params.get("from"))
@@ -279,6 +295,54 @@ class MonitorCheckHistoryView(APIView):
             checks = checks.filter(
                 executed_at__lte=to_date,
             )
+
+        # ==========================
+        # FILTRO SUCCESS
+        # ==========================
+
+        success = request.query_params.get("success")
+
+        if success is not None:
+
+            if success not in self.VALID_SUCCESS:
+                return Response(
+                    {
+                        "detail": (
+                            "Valore non valido per 'success'. "
+                            "Valori consentiti: true, false"
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            checks = checks.filter(success=(success == "true"))
+
+        # ==========================
+        # ORDINAMENTO
+        # ==========================
+
+        ordering = request.query_params.get(
+            "ordering",
+            "-executed_at",
+        )
+
+        if ordering not in self.VALID_ORDERING:
+            return Response(
+                {
+                    "detail": (
+                        "Ordinamento non valido. "
+                        "Valori consentiti: "
+                        f"{', '.join(self.VALID_ORDERING)}"
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        checks = checks.order_by(ordering)
+
+        # ==========================
+        # PAGINAZIONE
+        # ==========================
 
         paginator = HistoryPagination()
 

@@ -41,6 +41,20 @@ Monitor #{{ monitor.id }}
                 Analisi grafici
             </a>
 
+            <a
+                href="{% url 'monitor_checks' monitor.id %}"
+                class="btn btn-outline-primary rounded-pill">
+                <i class="bi bi-check2-circle me-1"></i>
+                Checks
+            </a>
+
+            <a
+                href="{% url 'monitor_incidents' monitor.id %}"
+                class="btn btn-outline-primary rounded-pill">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                Incidenti
+            </a>
+
             <a href="{% url 'monitor_edit' monitor.id %}"
                class="btn btn-outline-warning rounded-pill">
                 Modifica
