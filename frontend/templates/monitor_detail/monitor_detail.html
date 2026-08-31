@@ -25,61 +25,81 @@ Monitor #{{ monitor.id }}
             </div>
         </div>
 
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="monitor-detail-actions">
 
-            <button
-                type="button"
-                id="configuration-tab"
-                class="btn btn-outline-primary rounded-pill">
-                Configurazione
-            </button>
+            <div class="monitor-detail-navigation">
 
-            <a
-                href="{% url 'monitor_charts' monitor.id %}"
-                class="btn btn-outline-primary rounded-pill">
-                <i class="bi bi-graph-up me-1"></i>
-                Analisi grafici
-            </a>
+                <button
+                    type="button"
+                    id="configuration-tab"
+                    class="btn btn-outline-primary rounded-pill">
+                    Configurazione
+                </button>
 
-            <a
-                href="{% url 'monitor_checks' monitor.id %}"
-                class="btn btn-outline-primary rounded-pill">
-                <i class="bi bi-check2-circle me-1"></i>
-                Checks
-            </a>
+                <a
+                    href="{% url 'monitor_charts' monitor.id %}"
+                    class="btn btn-outline-primary rounded-pill">
+                    <i class="bi bi-graph-up"></i>
+                    <span>Grafici</span>
+                </a>
 
-            <a
-                href="{% url 'monitor_incidents' monitor.id %}"
-                class="btn btn-outline-primary rounded-pill">
-                <i class="bi bi-exclamation-triangle me-1"></i>
-                Incidenti
-            </a>
+                <a
+                    href="{% url 'monitor_checks' monitor.id %}"
+                    class="btn btn-outline-primary rounded-pill">
+                    <i class="bi bi-check2-circle"></i>
+                    <span>Checks</span>
+                </a>
 
-            <a href="{% url 'monitor_edit' monitor.id %}"
-               class="btn btn-outline-warning rounded-pill">
-                Modifica
-            </a>
+                <a
+                    href="{% url 'monitor_incidents' monitor.id %}"
+                    class="btn btn-outline-primary rounded-pill">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span>Incidenti</span>
+                </a>
 
-            <button id="duplicate-monitor-btn"
+            </div>
+
+
+            <div class="monitor-detail-divider"></div>
+
+
+            <div class="monitor-detail-controls">
+
+                <a
+                    href="{% url 'monitor_edit' monitor.id %}"
+                    class="btn btn-outline-warning rounded-pill">
+                    Modifica
+                </a>
+
+                <button
+                    id="duplicate-monitor-btn"
                     class="btn btn-outline-warning rounded-pill"
                     data-monitor-id="{{ monitor.id }}"
                     data-success-url="{% url 'dashboard' %}">
-                Duplica
-            </button>
+                    Duplica
+                </button>
 
-            {% if monitor.is_active %}
-                <button id="deactivate-monitor-btn"
+                {% if monitor.is_active %}
+
+                    <button
+                        id="deactivate-monitor-btn"
                         class="btn btn-outline-danger rounded-pill"
                         data-monitor-id="{{ monitor.id }}">
-                    Disattiva
-                </button>
-            {% else %}
-                <button id="activate-monitor-btn"
+                        Disattiva
+                    </button>
+
+                {% else %}
+
+                    <button
+                        id="activate-monitor-btn"
                         class="btn btn-outline-success rounded-pill"
                         data-monitor-id="{{ monitor.id }}">
-                    Attiva
-                </button>
-            {% endif %}
+                        Attiva
+                    </button>
+
+                {% endif %}
+
+            </div>
 
         </div>
 

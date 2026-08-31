@@ -135,6 +135,7 @@ body.incidents-page {
     margin-bottom: 0;
 
     color: #868e96;
+
     font-size: .75rem;
     font-style: italic;
 }
@@ -143,14 +144,15 @@ body.incidents-page {
     display: block;
 
     color: #868e96;
+
     font-size: .72rem;
     font-style: italic;
 }
 
 
-/***************/
-/* STATISTICS  */
-/***************/
+/**************/
+/* STATISTICS */
+/**************/
 
 .general-statistics {
     background:
@@ -173,10 +175,10 @@ body.incidents-page {
 }
 
 .general-statistics .card-header h5 {
+    color: #f8f9fa;
+
     font-size: .95rem;
     font-weight: 600;
-
-    color: #f8f9fa;
 }
 
 .general-stat-item {
@@ -271,11 +273,11 @@ body.incidents-page {
     border: 0;
     border-radius: 5px !important;
 
-    font-size: .75rem;
-    font-weight: 500;
-
     color: #adb5bd;
     background: transparent;
+
+    font-size: .75rem;
+    font-weight: 500;
 
     transition:
         background-color .15s ease,
@@ -284,6 +286,7 @@ body.incidents-page {
 
 .stats-period .btn:hover {
     background: #343a40;
+
     color: #fff;
 }
 
@@ -423,6 +426,24 @@ body.incidents-page {
 
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.checks-filters {
+    background-color: #2b3035;
+}
+
+.checks-filter-label {
+    display: block;
+
+    margin-bottom: .3rem;
+
+    color: #868e96;
+
+    font-size: .72rem;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: .04em;
 }
 
 
@@ -627,9 +648,50 @@ body.incidents-page {
 }
 
 
-/***************/
-/* ADD MONITOR */
-/***************/
+/**********************/
+/* MONITOR DETAIL     */
+/**********************/
+
+.monitor-detail-actions {
+    display: flex;
+
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: .5rem;
+
+    flex-wrap: wrap;
+}
+
+.monitor-detail-navigation,
+.monitor-detail-controls {
+    display: flex;
+
+    align-items: center;
+
+    gap: .5rem;
+
+    flex-wrap: wrap;
+}
+
+.monitor-detail-navigation .btn,
+.monitor-detail-controls .btn {
+    white-space: nowrap;
+}
+
+.monitor-detail-divider {
+    width: 1px;
+    height: 24px;
+
+    background-color: #495057;
+
+    margin: 0 .25rem;
+}
+
+
+/****************/
+/* ADD MONITOR  */
+/****************/
 
 .section-title {
     font-size: 1rem;
@@ -677,23 +739,17 @@ body.incidents-page {
         border-color .15s ease;
 }
 
-/*****************/
-/* CHECKS FILTER */
-/*****************/
 
-.checks-filters {
-    background-color: #2b3035;
-}
+/***************/
+/* RESPONSIVE  */
+/***************/
 
-.checks-filter-label {
-    display: block;
-    margin-bottom: .3rem;
+@media (max-width: 1200px) {
 
-    color: #868e96;
+    .monitor-detail-actions {
+        width: 100%;
 
-    font-size: .72rem;
-    font-weight: 600;
+        justify-content: flex-start;
+    }
 
-    text-transform: uppercase;
-    letter-spacing: .04em;
 }
