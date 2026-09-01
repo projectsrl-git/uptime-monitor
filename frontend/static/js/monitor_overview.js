@@ -229,469 +229,353 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateResponseTimeChart(data) {
 
-        const canvas = document.getElementById("response-time-chart");
+        const canvas =
+            document.getElementById(
+                "response-time-chart"
+            );
 
         if (!canvas) {
             return;
         }
 
-        const now = new Date();
-        const start = new Date(now);
+        const labels = data.map(item =>
+            formatDate(
+                item.date,
+                currentPeriod
+            )
+        );
 
-        if (currentPeriod === "24h") {
-            start.setHours(start.getHours() - 24);
-        }
+        const values = data.map(item =>
+            item.average_ms
+        );
 
-        else if (currentPeriod === "7d") {
-            start.setDate(start.getDate() - 7);
-        }
-
-        else if (currentPeriod === "30d") {
-            start.setDate(start.getDate() - 30);
-        }
-
-        else if (currentPeriod === "365d") {
-            start.setDate(start.getDate() - 365);
-        }
-
-        let bucketMilliseconds;
-
-        if (currentPeriod === "24h") {
-            bucketMilliseconds = 60 * 60 * 1000;
-        }
-
-        else if (currentPeriod === "7d") {
-            bucketMilliseconds = 6 * 60 * 60 * 1000;
-        }
-
-        else if (currentPeriod === "30d") {
-            bucketMilliseconds = 24 * 60 * 60 * 1000;
-        }
-
-        else {
-            bucketMilliseconds = 7 * 24 * 60 * 60 * 1000;
-        }
-
-        const labels = [];
-        const values = [];
-
-        let current = new Date(start);
-
-        while (current < now) {
-
-            const bucketEnd = new Date(
-                current.getTime() + bucketMilliseconds
-            );
-
-            const item = data.find(item => {
-
-                const itemDate = new Date(item.date);
-
-                return (
-                    itemDate >= current &&
-                    itemDate < bucketEnd
-                );
-            });
-
-            labels.push(
-                formatDate(current.toISOString(), currentPeriod)
-            );
-
-            values.push(
-                item ? item.average_ms : null
-            );
-
-            current = bucketEnd;
-        }
 
         if (responseTimeChart) {
             responseTimeChart.destroy();
         }
 
-        responseTimeChart = new Chart(canvas, {
-            type: "line",
 
-            data: {
-                labels: labels,
+        responseTimeChart = new Chart(
+            canvas,
+            {
+                type: "line",
 
-                datasets: [{
-                    label: "Response time",
-                    data: values,
-                    tension: 0.35,
-                    pointRadius: 0,
-                    pointHoverRadius: 4,
-                    borderWidth: 2,
-                    spanGaps: false
-                }]
-            },
+                data: {
+                    labels: labels,
 
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                    datasets: [{
+                        label: "Response time",
+                        data: values,
 
-                interaction: {
-                    intersect: false,
-                    mode: "index"
+                        tension: 0.35,
+
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+
+                        borderWidth: 2,
+
+                        fill: false,
+
+                        spanGaps: false
+                    }]
                 },
 
-                scales: {
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
 
-                    y: {
-                        beginAtZero: true,
+                    interaction: {
+                        intersect: false,
+                        mode: "index"
+                    },
 
-                        ticks: {
-                            maxTicksLimit: 5
+                    scales: {
+
+                        y: {
+                            beginAtZero: true,
+
+                            ticks: {
+                                maxTicksLimit: 5
+                            },
+
+                            title: {
+                                display: true,
+                                text: "Millisecondi (ms)"
+                            }
                         },
 
-                        title: {
-                            display: true,
-                            text: "Millisecondi (ms)"
+                        x: {
+                            grid: {
+                                display: false
+                            },
+
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 6,
+                                maxRotation: 0
+                            }
                         }
                     },
 
-                    x: {
-                        grid: {
+                    plugins: {
+
+                        legend: {
                             display: false
                         },
 
-                        ticks: {
-                            autoSkip: true,
-                            maxTicksLimit: 6,
-                            maxRotation: 0
-                        }
-                    }
+                        tooltip: {
 
-                },
+                            callbacks: {
 
-                plugins: {
+                                label: function (context) {
 
-                    legend: {
-                        display: false
-                    },
+                                    if (
+                                        context.raw === null
+                                    ) {
+                                        return "Response time: nessun dato";
+                                    }
 
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-
-                                if (context.raw === null) {
-                                    return "Response time: nessun dato";
+                                    return (
+                                        `Response time: ${context.raw} ms`
+                                    );
                                 }
-
-                                return `Response time: ${context.raw} ms`;
                             }
                         }
                     }
-
                 }
             }
-        });
+        );
     }
 
 
     function updateChecksChart(data) {
 
-        const canvas = document.getElementById("checks-chart");
+        const canvas =
+            document.getElementById(
+                "checks-chart"
+            );
 
         if (!canvas) {
             return;
         }
 
-        const now = new Date();
-        const start = new Date(now);
 
-        if (currentPeriod === "24h") {
-            start.setHours(start.getHours() - 24);
-        }
+        const labels = data.map(item =>
+            formatDate(
+                item.date,
+                currentPeriod
+            )
+        );
 
-        else if (currentPeriod === "7d") {
-            start.setDate(start.getDate() - 7);
-        }
 
-        else if (currentPeriod === "30d") {
-            start.setDate(start.getDate() - 30);
-        }
+        const successfulValues = data.map(item =>
+            item.successful
+        );
 
-        else if (currentPeriod === "365d") {
-            start.setDate(start.getDate() - 365);
-        }
 
-        let bucketMilliseconds;
+        const failedValues = data.map(item =>
+            item.failed
+        );
 
-        if (currentPeriod === "24h") {
-            bucketMilliseconds = 60 * 60 * 1000;
-        }
-
-        else if (currentPeriod === "7d") {
-            bucketMilliseconds = 6 * 60 * 60 * 1000;
-        }
-
-        else if (currentPeriod === "30d") {
-            bucketMilliseconds = 24 * 60 * 60 * 1000;
-        }
-
-        else {
-            bucketMilliseconds = 7 * 24 * 60 * 60 * 1000;
-        }
-
-        const labels = [];
-        const successfulValues = [];
-        const failedValues = [];
-
-        let current = new Date(start);
-
-        while (current < now) {
-
-            const bucketEnd = new Date(
-                current.getTime() + bucketMilliseconds
-            );
-
-            const item = data.find(item => {
-
-                const itemDate = new Date(item.date);
-
-                return (
-                    itemDate >= current &&
-                    itemDate < bucketEnd
-                );
-            });
-
-            labels.push(
-                formatDate(
-                    current.toISOString(),
-                    currentPeriod
-                )
-            );
-
-            successfulValues.push(
-                item ? item.successful : null
-            );
-
-            failedValues.push(
-                item ? item.failed : null
-            );
-
-            current = bucketEnd;
-        }
 
         if (checksChart) {
             checksChart.destroy();
         }
 
-        checksChart = new Chart(canvas, {
-            type: "bar",
 
-            data: {
-                labels: labels,
+        checksChart = new Chart(
+            canvas,
+            {
+                type: "bar",
 
-                datasets: [
-                    {
-                        label: "Riusciti",
-                        data: successfulValues,
-                        borderWidth: 0,
-                        barPercentage: 0.7,
-                        categoryPercentage: 0.8
-                    },
-                    {
-                        label: "Falliti",
-                        data: failedValues,
-                        borderWidth: 0,
-                        barPercentage: 0.7,
-                        categoryPercentage: 0.8
-                    }
-                ]
-            },
+                data: {
+                    labels: labels,
 
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                    datasets: [
 
-                scales: {
+                        {
+                            label: "Riusciti",
 
-                    y: {
-                        beginAtZero: true,
+                            data: successfulValues,
 
-                        ticks: {
-                            maxTicksLimit: 5,
-                            precision: 0
+                            borderWidth: 0,
+
+                            barPercentage: 0.7,
+                            categoryPercentage: 0.8
                         },
 
-                        title: {
-                            display: true,
-                            text: "Check"
+                        {
+                            label: "Falliti",
+
+                            data: failedValues,
+
+                            borderWidth: 0,
+
+                            barPercentage: 0.7,
+                            categoryPercentage: 0.8
                         }
-                    },
 
-                    x: {
-                        grid: {
-                            display: false
-                        },
-
-                        ticks: {
-                            autoSkip: true,
-                            maxTicksLimit: 6,
-                            maxRotation: 0
-                        }
-                    }
-
+                    ]
                 },
 
-                plugins: {
-                    legend: {
-                        display: true
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    scales: {
+
+                        y: {
+                            beginAtZero: true,
+
+                            ticks: {
+                                maxTicksLimit: 5,
+                                precision: 0
+                            },
+
+                            title: {
+                                display: true,
+                                text: "Check"
+                            }
+                        },
+
+                        x: {
+                            grid: {
+                                display: false
+                            },
+
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 6,
+                                maxRotation: 0
+                            }
+                        }
+
+                    },
+
+                    plugins: {
+
+                        legend: {
+                            display: true
+                        },
+
+                        tooltip: {
+
+                            callbacks: {
+
+                                label: function (context) {
+
+                                    return (
+                                        `${context.dataset.label}: ${context.raw}`
+                                    );
+                                }
+                            }
+                        }
                     }
                 }
             }
-        });
+        );
     }
 
 
     function updateIncidentsChart(data) {
 
-        const canvas = document.getElementById("incidents-chart");
+        const canvas =
+            document.getElementById(
+                "incidents-chart"
+            );
 
         if (!canvas) {
             return;
         }
 
-        const now = new Date();
-        const start = new Date(now);
 
-        if (currentPeriod === "24h") {
-            start.setHours(start.getHours() - 24);
-        }
+        const labels = data.map(item =>
+            formatDate(
+                item.date,
+                currentPeriod
+            )
+        );
 
-        else if (currentPeriod === "7d") {
-            start.setDate(start.getDate() - 7);
-        }
 
-        else if (currentPeriod === "30d") {
-            start.setDate(start.getDate() - 30);
-        }
+        const values = data.map(item =>
+            item.count
+        );
 
-        else if (currentPeriod === "365d") {
-            start.setDate(start.getDate() - 365);
-        }
-
-        let bucketMilliseconds;
-
-        if (currentPeriod === "24h") {
-            bucketMilliseconds = 60 * 60 * 1000;
-        }
-
-        else if (currentPeriod === "7d") {
-            bucketMilliseconds = 6 * 60 * 60 * 1000;
-        }
-
-        else if (currentPeriod === "30d") {
-            bucketMilliseconds = 24 * 60 * 60 * 1000;
-        }
-
-        else {
-            bucketMilliseconds = 7 * 24 * 60 * 60 * 1000;
-        }
-
-        const labels = [];
-        const values = [];
-
-        let current = new Date(start);
-
-        while (current < now) {
-
-            const bucketEnd = new Date(
-                current.getTime() + bucketMilliseconds
-            );
-
-            let count = 0;
-
-            data.forEach(item => {
-
-                const itemDate = new Date(item.date);
-
-                if (
-                    itemDate >= current &&
-                    itemDate < bucketEnd
-                ) {
-                    count += item.count;
-                }
-            });
-
-            labels.push(
-                formatDate(
-                    current.toISOString(),
-                    currentPeriod
-                )
-            );
-
-            values.push(count);
-
-            current = bucketEnd;
-        }
 
         if (incidentsChart) {
             incidentsChart.destroy();
         }
 
-        incidentsChart = new Chart(canvas, {
-            type: "bar",
 
-            data: {
-                labels: labels,
+        incidentsChart = new Chart(
+            canvas,
+            {
+                type: "bar",
 
-                datasets: [{
-                    label: "Incidenti",
-                    data: values,
+                data: {
+                    labels: labels,
 
-                    backgroundColor: "rgba(220, 53, 69, 0.7)",
-                    borderColor: "rgba(220, 53, 69, 1)",
+                    datasets: [{
+                        label: "Incidenti",
 
-                    borderWidth: 0,
+                        data: values,
 
-                    barPercentage: 0.7,
-                    categoryPercentage: 0.8
-                }]
-            },
+                        backgroundColor:
+                            "rgba(220, 53, 69, 0.7)",
 
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                        borderColor:
+                            "rgba(220, 53, 69, 1)",
 
-                scales: {
+                        borderWidth: 0,
 
-                    y: {
-                        beginAtZero: true,
-
-                        ticks: {
-                            maxTicksLimit: 5,
-                            precision: 0
-                        },
-
-                        title: {
-                            display: true,
-                            text: "Incidenti"
-                        }
-                    },
-
-                    x: {
-                        grid: {
-                            display: false
-                        },
-
-                        ticks: {
-                            autoSkip: true,
-                            maxTicksLimit: 6,
-                            maxRotation: 0
-                        }
-                    }
-
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.8
+                    }]
                 },
 
-                plugins: {
-                    legend: {
-                        display: false
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    scales: {
+
+                        y: {
+                            beginAtZero: true,
+
+                            ticks: {
+                                maxTicksLimit: 5,
+                                precision: 0
+                            },
+
+                            title: {
+                                display: true,
+                                text: "Incidenti"
+                            }
+                        },
+
+                        x: {
+                            grid: {
+                                display: false
+                            },
+
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 6,
+                                maxRotation: 0
+                            }
+                        }
+
+                    },
+
+                    plugins: {
+
+                        legend: {
+                            display: false
+                        }
                     }
                 }
             }
-        });
+        );
     }
 
 

@@ -45,7 +45,6 @@ class StatisticsView(APIView):
                 }
             )
 
-
         now = timezone.now()
 
         period_start = now - PERIODS[period]
@@ -166,7 +165,28 @@ class MonitorStatisticsView(APIView):
             )
 
         now = timezone.now()
+
         period_start = now - PERIODS[period]
+
+        # ==================================================
+        # GRANULARITÀ
+        # ==================================================
+
+        if period == "24h":
+
+            bucket = timedelta(hours=1)
+
+        elif period == "7d":
+
+            bucket = timedelta(hours=12)
+
+        elif period == "30d":
+
+            bucket = timedelta(days=1)
+
+        else:
+
+            bucket = timedelta(days=7)
 
         # ==================================================
         # CHECK
@@ -180,22 +200,33 @@ class MonitorStatisticsView(APIView):
 
         check_stats = checks.aggregate(
             total=Count("id"),
-            successful=Count("id", filter=Q(success=True)),
-            failed=Count("id", filter=Q(success=False)),
+            successful=Count(
+                "id",
+                filter=Q(success=True),
+            ),
+            failed=Count(
+                "id",
+                filter=Q(success=False),
+            ),
             response_time_min=Min("response_time_ms"),
             response_time_max=Max("response_time_ms"),
             response_time_average=Avg("response_time_ms"),
         )
 
         total_checks = check_stats["total"] or 0
+
         successful_checks = check_stats["successful"] or 0
+
         failed_checks = check_stats["failed"] or 0
 
         response_time_min = check_stats["response_time_min"]
+
         response_time_max = check_stats["response_time_max"]
+
         response_time_average = check_stats["response_time_average"]
 
         if response_time_average is not None:
+
             response_time_average = round(
                 response_time_average,
                 2,
@@ -217,12 +248,14 @@ class MonitorStatisticsView(APIView):
         # INCIDENTI
         # ==================================================
 
-        incidents = Incident.objects.filter(
-            monitor=monitor,
-            started_at__lt=now,
-        ).filter(Q(ended_at__isnull=True) | Q(ended_at__gt=period_start))
-
-        incidents = incidents.distinct()
+        incidents = (
+            Incident.objects.filter(
+                monitor=monitor,
+                started_at__lt=now,
+            )
+            .filter(Q(ended_at__isnull=True) | Q(ended_at__gt=period_start))
+            .distinct()
+        )
 
         incident_count = Incident.objects.filter(
             monitor=monitor,
@@ -256,65 +289,114 @@ class MonitorStatisticsView(APIView):
         # RESPONSE TIME NEL TEMPO
         # ==================================================
 
-        if period == "24h":
-
-            trunc_function = TruncHour("executed_at")
-
-        else:
-
-            trunc_function = TruncDay("executed_at")
-
-        response_time_data = (
-            checks.annotate(date=trunc_function)
-            .values("date")
-            .annotate(average_ms=Avg("response_time_ms"))
-            .order_by("date")
-        )
-
         response_time = []
 
-        for item in response_time_data:
+        current_start = period_start
 
-            average_ms = item["average_ms"]
+        # Creiamo un dizionario con i check
+        # raggruppati nel relativo bucket.
 
-            if average_ms is not None:
+        bucket_values = {}
+
+        for check in checks.values(
+            "executed_at",
+            "response_time_ms",
+        ):
+
+            if check["response_time_ms"] is None:
+                continue
+
+            executed_at = check["executed_at"]
+
+            elapsed = (executed_at - period_start).total_seconds()
+
+            bucket_index = int(elapsed / bucket.total_seconds())
+
+            bucket_start = period_start + bucket * bucket_index
+
+            bucket_values.setdefault(bucket_start, []).append(check["response_time_ms"])
+
+        while current_start < now:
+
+            values = bucket_values.get(current_start, [])
+
+            if values:
+
                 average_ms = round(
-                    average_ms,
+                    sum(values) / len(values),
                     2,
                 )
 
+            else:
+
+                average_ms = None
+
             response_time.append(
                 {
-                    "date": item["date"],
+                    "date": current_start,
                     "average_ms": average_ms,
                 }
             )
+
+            current_start += bucket
 
         # ==================================================
         # CHECK NEL TEMPO
         # ==================================================
 
-        check_data = (
-            checks.annotate(date=trunc_function)
-            .values("date")
-            .annotate(
-                successful=Count("id", filter=Q(success=True)),
-                failed=Count("id", filter=Q(success=False)),
-            )
-            .order_by("date")
-        )
-
         checks_over_time = []
 
-        for item in check_data:
+        current_start = period_start
+
+        check_bucket_values = {}
+
+        for check in checks.values(
+            "executed_at",
+            "success",
+        ):
+
+            executed_at = check["executed_at"]
+
+            elapsed = (executed_at - period_start).total_seconds()
+
+            bucket_index = int(elapsed / bucket.total_seconds())
+
+            bucket_start = period_start + bucket * bucket_index
+
+            if bucket_start not in check_bucket_values:
+
+                check_bucket_values[bucket_start] = {
+                    "successful": 0,
+                    "failed": 0,
+                }
+
+            if check["success"]:
+
+                check_bucket_values[bucket_start]["successful"] += 1
+
+            else:
+
+                check_bucket_values[bucket_start]["failed"] += 1
+
+        while current_start < now:
+
+            values = check_bucket_values.get(
+                current_start,
+                {
+                    "successful": 0,
+                    "failed": 0,
+                },
+            )
 
             checks_over_time.append(
                 {
-                    "date": item["date"],
-                    "successful": item["successful"],
-                    "failed": item["failed"],
+                    "date": current_start,
+                    "successful": values["successful"],
+                    "failed": values["failed"],
                 }
             )
+
+            current_start += bucket
 
         # ==================================================
         # INCIDENTI NEL TEMPO
@@ -325,25 +407,9 @@ class MonitorStatisticsView(APIView):
                 monitor=monitor,
                 started_at__lt=now,
             )
-            .filter(
-                Q(ended_at__isnull=True)
-                | Q(ended_at__gt=period_start)
-            )
+            .filter(Q(ended_at__isnull=True) | Q(ended_at__gt=period_start))
             .order_by("started_at")
         )
-
-        if period == "24h":
-            bucket = timedelta(hours=1)
-
-        elif period == "7d":
-            bucket = timedelta(hours=6)
-
-        elif period == "30d":
-            bucket = timedelta(days=1)
-
-        else:
-            bucket = timedelta(days=7)
-
 
         incidents_over_time = []
 
@@ -356,14 +422,12 @@ class MonitorStatisticsView(APIView):
                 now,
             )
 
-            bucket_incidents = incident_data.filter(
-                started_at__lt=current_end
-            ).filter(
-                Q(ended_at__isnull=True)
-                | Q(ended_at__gt=current_start)
+            bucket_incidents = incident_data.filter(started_at__lt=current_end).filter(
+                Q(ended_at__isnull=True) | Q(ended_at__gt=current_start)
             )
 
             incident_count = 0
+
             downtime_seconds = 0
 
             for incident in bucket_incidents:
@@ -383,9 +447,7 @@ class MonitorStatisticsView(APIView):
                     incident_count += 1
 
                     downtime_seconds += int(
-                        (
-                            incident_end - incident_start
-                        ).total_seconds()
+                        (incident_end - incident_start).total_seconds()
                     )
 
             incidents_over_time.append(
@@ -403,18 +465,6 @@ class MonitorStatisticsView(APIView):
         # ==================================================
 
         uptime = []
-
-        if period == "24h":
-            bucket = timedelta(hours=1)
-
-        elif period == "7d":
-            bucket = timedelta(hours=6)
-
-        elif period == "30d":
-            bucket = timedelta(days=1)
-
-        else:
-            bucket = timedelta(days=7)
 
         current_start = period_start
 
@@ -448,12 +498,12 @@ class MonitorStatisticsView(APIView):
             {
                 "period": period,
                 "summary": {
-                    "uptime_percentage": uptime_percentage,
-                    "downtime_seconds": total_downtime,
+                    "uptime_percentage": (uptime_percentage),
+                    "downtime_seconds": (total_downtime),
                     "checks": total_checks,
-                    "successful_checks": successful_checks,
-                    "failed_checks": failed_checks,
-                    "incidents": incident_count,
+                    "successful_checks": (successful_checks),
+                    "failed_checks": (failed_checks),
+                    "incidents": (incident_count),
                 },
                 "response_time": {
                     "min_ms": response_time_min,
@@ -462,7 +512,7 @@ class MonitorStatisticsView(APIView):
                 },
                 "checks": checks_over_time,
                 "uptime": uptime,
-                "response_time_over_time": response_time,
+                "response_time_over_time": (response_time),
                 "incidents": incidents_over_time,
             }
         )
