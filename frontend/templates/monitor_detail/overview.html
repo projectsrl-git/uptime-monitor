@@ -1,0 +1,280 @@
+<!-- PERIODO -->
+<div class="d-flex justify-content-center mb-3">
+
+    <div class="btn-group btn-group-sm stats-period" role="group">
+
+        <button
+            type="button"
+            class="btn active statistics-period"
+            data-period="24h">
+            24 ore
+        </button>
+
+        <button
+            type="button"
+            class="btn statistics-period"
+            data-period="7d">
+            7 giorni
+        </button>
+
+        <button
+            type="button"
+            class="btn statistics-period"
+            data-period="30d">
+            30 giorni
+        </button>
+
+        <button
+            type="button"
+            class="btn statistics-period"
+            data-period="365d">
+            365 giorni
+        </button>
+
+    </div>
+
+</div>
+
+
+<div class="row g-3">
+
+    <!-- COLONNA STATISTICHE -->
+    <div class="col-lg-3">
+
+        <!-- STATISTICHE -->
+        <div class="card shadow-sm mb-3">
+
+            <div class="card-header">
+                <h6 class="mb-0">
+                    Statistiche
+                </h6>
+            </div>
+
+            <div class="card-body p-3">
+
+                <div class="row g-0 text-center">
+
+                    <div class="col-6 border-end border-bottom pb-3">
+                        <div class="text-muted small mb-1">
+                            Uptime
+                        </div>
+
+                        <div
+                            id="uptime-percentage"
+                            class="fw-bold fs-4">
+                            -
+                        </div>
+                    </div>
+
+                    <div class="col-6 border-bottom pb-3">
+                        <div class="text-muted small mb-1">
+                            Downtime
+                        </div>
+
+                        <div
+                            id="downtime"
+                            class="fw-bold fs-4">
+                            -
+                        </div>
+                    </div>
+
+                    <div class="col-6 border-end pt-3">
+                        <div class="text-muted small mb-1">
+                            Check
+                        </div>
+
+                        <div
+                            id="checks"
+                            class="fw-bold fs-4">
+                            -
+                        </div>
+                    </div>
+
+                    <div class="col-6 pt-3">
+                        <div class="text-muted small mb-1">
+                            Incidenti
+                        </div>
+
+                        <div
+                            id="incidents"
+                            class="fw-bold fs-4">
+                            -
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RESPONSE TIME -->
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+                <h6 class="mb-0">
+                    Response time
+                </h6>
+            </div>
+
+            <div class="card-body">
+
+                <div class="text-center mb-3">
+
+                    <div class="text-muted small">
+                        Media
+                    </div>
+
+                    <div
+                        id="response-time-average"
+                        class="fw-bold fs-2">
+                        -
+                    </div>
+
+                </div>
+
+                <div class="row text-center">
+
+                    <div class="col-6 border-end">
+
+                        <div class="text-muted small">
+                            Minimo
+                        </div>
+
+                        <div
+                            id="response-time-min"
+                            class="fw-semibold mt-1">
+                            -
+                        </div>
+
+                    </div>
+
+                    <div class="col-6">
+
+                        <div class="text-muted small">
+                            Massimo
+                        </div>
+
+                        <div
+                            id="response-time-max"
+                            class="fw-semibold mt-1">
+                            -
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- COLONNA GRAFICI -->
+    <div class="col-lg-9">
+
+        <div class="row g-3">
+
+            <!-- UPTIME -->
+            <div class="col-md-6">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-header py-2">
+                        <h6 class="mb-0">
+                            Uptime nel tempo
+                        </h6>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div style="height: 180px;">
+                            <canvas id="uptime-chart"></canvas>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- RESPONSE TIME -->
+            <div class="col-md-6">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-header py-2">
+                        <h6 class="mb-0">
+                            Response time nel tempo
+                        </h6>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div style="height: 180px;">
+                            <canvas id="response-time-chart"></canvas>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- CHECK -->
+            <div class="col-md-6">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-header py-2">
+                        <h6 class="mb-0">
+                            Check nel tempo
+                        </h6>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div style="height: 180px;">
+                            <canvas id="checks-chart"></canvas>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- INCIDENTI -->
+            <div class="col-md-6">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-header py-2">
+                        <h6 class="mb-0">
+                            Incidenti nel tempo
+                        </h6>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div style="height: 180px;">
+                            <canvas id="incidents-chart"></canvas>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
