@@ -8,8 +8,7 @@ body {
     background-color: #212529;
 }
 
-body.dashboard-page,
-body.incidents-page {
+body.dashboard-page {
     overflow: hidden;
 }
 
@@ -739,6 +738,65 @@ body.incidents-page {
         border-color .15s ease;
 }
 
+/**********************/
+/* INCIDENT STATISTICS */
+/**********************/
+
+.incident-stat-card {
+    background-color: #2b3035;
+}
+
+.incident-stat-card .card-body {
+    padding: 1rem;
+}
+
+.incident-stat-period {
+    margin-bottom: .4rem;
+
+    color: #868e96;
+
+    font-size: .75rem;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.incident-stat-label {
+    color: #adb5bd;
+
+    font-size: .8rem;
+    font-weight: 500;
+}
+
+.incident-stat-value {
+    margin: .1rem 0 .6rem;
+
+    color: #f8f9fa;
+
+    font-size: 1.6rem;
+    line-height: 1.1;
+    font-weight: 700;
+}
+
+.incident-stat-details {
+    display: flex;
+    flex-direction: column;
+
+    gap: .25rem;
+
+    color: #868e96;
+
+    font-size: .75rem;
+    line-height: 1.2;
+}
+
+.incident-stat-details strong {
+    color: #dee2e6;
+
+    font-weight: 600;
+}
+
 
 /***************/
 /* RESPONSIVE  */
@@ -753,3 +811,4 @@ body.incidents-page {
     }
 
 }
+
