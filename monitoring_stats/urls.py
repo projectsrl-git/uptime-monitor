@@ -1,7 +1,10 @@
 from django.urls import path
 
-from .views import StatisticsView
-from incident.views import IncidentStatisticsView
+from .views import (
+    StatisticsView,
+    IncidentStatisticsView,
+    StatisticsExportView,
+)
 
 urlpatterns = [
     path(
@@ -13,5 +16,10 @@ urlpatterns = [
         "incidents/",
         IncidentStatisticsView.as_view(),
         name="incident_statistics",
+    ),
+    path(
+        "export/",
+        StatisticsExportView.as_view(),
+        name="statistics_export",
     ),
 ]
