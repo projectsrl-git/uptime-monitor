@@ -1,11 +1,34 @@
 let currentPeriod = "24h";
+const REFRESH_INTERVAL_MS = 5000;
+let refreshTimer = null;
+let lastMonitorsSnapshot = null;
+let lastTotalsSnapshot = null;
+
+async function refreshStatus() {
+    await Promise.all([
+        loadMonitors(),
+        loadTotalUptimes(),
+    ]);
+}
+
+function startAutoRefresh() {
+    if (refreshTimer) {
+        clearInterval(refreshTimer);
+    }
+
+    refreshTimer = setInterval(async () => {
+        try {
+            await refreshStatus();
+        } catch (error) {
+            console.error("Errore aggiornamento automatico", error);
+        }
+    }, REFRESH_INTERVAL_MS);
+}
 
 document.addEventListener("DOMContentLoaded", () => {
 
-
-    loadMonitors();
-    loadTotalUptimes();
-
+    refreshStatus();
+    startAutoRefresh();
 
     document
         .querySelectorAll(".statistics-period")
@@ -24,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 currentPeriod =
                     button.dataset.period;
 
-                await loadMonitors();
+                await refreshStatus();
 
             });
 
@@ -35,7 +58,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function apiFetch(url) {
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+        cache: "no-store",
+    });
 
     if (!response.ok) {
         throw new Error(
@@ -54,9 +79,10 @@ async function loadMonitors() {
             "monitor-status-list"
         );
 
-    container.innerHTML =
-        '<div class="p-3 text-muted">Caricamento...</div>';
-
+    if (lastMonitorsSnapshot === null) {
+        container.innerHTML =
+            '<div class="p-3 text-muted">Caricamento...</div>';
+    }
 
     try {
 
@@ -94,14 +120,28 @@ async function loadMonitors() {
             })
         );
 
-        renderMonitors(results);
+        const snapshot = JSON.stringify(
+            results.map(monitor => ({
+                id: monitor.id,
+                name: monitor.name,
+                status: monitor.status,
+                uptime: monitor.uptime,
+            }))
+        );
+
+        if (snapshot !== lastMonitorsSnapshot) {
+            lastMonitorsSnapshot = snapshot;
+            renderMonitors(results);
+        }
 
     } catch (error) {
 
         console.error(error);
 
-        container.innerHTML =
-            '<div class="p-3 text-muted">Errore caricamento monitor</div>';
+        if (lastMonitorsSnapshot === null) {
+            container.innerHTML =
+                '<div class="p-3 text-muted">Errore caricamento monitor</div>';
+        }
 
     }
 }
@@ -371,6 +411,16 @@ async function loadTotalUptimes() {
             )
         )
     );
+
+    const snapshot = JSON.stringify(
+        results.map(result => result.uptime_percentage)
+    );
+
+    if (snapshot === lastTotalsSnapshot) {
+        return;
+    }
+
+    lastTotalsSnapshot = snapshot;
 
     periods.forEach((period, index) => {
 
