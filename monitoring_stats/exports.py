@@ -185,6 +185,7 @@ def build_statistics_workbook(
     monitors,
     period,
     include_summary=True,
+    include_monitor_sheets=True,
 ):
     workbook = Workbook()
 
@@ -520,372 +521,374 @@ def build_statistics_workbook(
 
     for item in monitor_data:
 
-        monitor = item["monitor"]
+        if include_monitor_sheets:
 
-        statistics = item["statistics"]
+            monitor = item["monitor"]
 
-        sheet_name = make_unique_sheet_name(
-            workbook,
-            monitor,
-        )
+            statistics = item["statistics"]
 
-        sheet = workbook.create_sheet(sheet_name)
-
-        summary_data = statistics["summary"]
-
-        response_summary = statistics["response_time"]
-
-        # --------------------------------------------------
-        # TITOLO
-        # --------------------------------------------------
-
-        sheet.merge_cells("A1:H1")
-
-        sheet["A1"] = monitor.name
-
-        sheet["A1"].fill = PatternFill(
-            fill_type="solid",
-            fgColor=TITLE_FILL,
-        )
-
-        sheet["A1"].font = Font(
-            bold=True,
-            size=16,
-            color=TITLE_FONT,
-        )
-
-        sheet["A1"].alignment = Alignment(
-            vertical="center",
-        )
-
-        sheet.row_dimensions[1].height = 28
-
-        # --------------------------------------------------
-        # PERIODO
-        # --------------------------------------------------
-
-        sheet.merge_cells("A2:H2")
-
-        sheet["A2"] = (
-            f"Periodo: {period}   |   "
-            f"Generato il: "
-            f"{timezone.localtime(now):%d/%m/%Y %H:%M}"
-        )
-
-        sheet["A2"].font = Font(
-            color="495057",
-            italic=True,
-        )
-
-        # --------------------------------------------------
-        # STATISTICHE RIASSUNTIVE
-        # --------------------------------------------------
-
-        kpi_labels = [
-            "Uptime",
-            "Response medio",
-            "Response minimo",
-            "Response massimo",
-            "Checks",
-            "Checks OK",
-            "Checks KO",
-            "Incidenti",
-        ]
-
-        kpi_values = [
-            summary_data["uptime_percentage"],
-            response_summary["average_ms"],
-            response_summary["min_ms"],
-            response_summary["max_ms"],
-            summary_data["checks"],
-            summary_data["successful_checks"],
-            summary_data["failed_checks"],
-            summary_data["incidents"],
-        ]
-
-        # Prima riga KPI
-        for index in range(8):
-
-            column = index + 1
-
-            label_cell = sheet.cell(
-                row=4,
-                column=column,
+            sheet_name = make_unique_sheet_name(
+                workbook,
+                monitor,
             )
 
-            value_cell = sheet.cell(
-                row=5,
-                column=column,
+            sheet = workbook.create_sheet(sheet_name)
+
+            summary_data = statistics["summary"]
+
+            response_summary = statistics["response_time"]
+
+            # --------------------------------------------------
+            # TITOLO
+            # --------------------------------------------------
+
+            sheet.merge_cells("A1:H1")
+
+            sheet["A1"] = monitor.name
+
+            sheet["A1"].fill = PatternFill(
+                fill_type="solid",
+                fgColor=TITLE_FILL,
             )
 
-            label_cell.value = kpi_labels[index]
+            sheet["A1"].font = Font(
+                bold=True,
+                size=16,
+                color=TITLE_FONT,
+            )
 
-            label_cell.fill = PatternFill(
+            sheet["A1"].alignment = Alignment(
+                vertical="center",
+            )
+
+            sheet.row_dimensions[1].height = 28
+
+            # --------------------------------------------------
+            # PERIODO
+            # --------------------------------------------------
+
+            sheet.merge_cells("A2:H2")
+
+            sheet["A2"] = (
+                f"Periodo: {period}   |   "
+                f"Generato il: "
+                f"{timezone.localtime(now):%d/%m/%Y %H:%M}"
+            )
+
+            sheet["A2"].font = Font(
+                color="495057",
+                italic=True,
+            )
+
+            # --------------------------------------------------
+            # STATISTICHE RIASSUNTIVE
+            # --------------------------------------------------
+
+            kpi_labels = [
+                "Uptime",
+                "Response medio",
+                "Response minimo",
+                "Response massimo",
+                "Checks",
+                "Checks OK",
+                "Checks KO",
+                "Incidenti",
+            ]
+
+            kpi_values = [
+                summary_data["uptime_percentage"],
+                response_summary["average_ms"],
+                response_summary["min_ms"],
+                response_summary["max_ms"],
+                summary_data["checks"],
+                summary_data["successful_checks"],
+                summary_data["failed_checks"],
+                summary_data["incidents"],
+            ]
+
+            # Prima riga KPI
+            for index in range(8):
+
+                column = index + 1
+
+                label_cell = sheet.cell(
+                    row=4,
+                    column=column,
+                )
+
+                value_cell = sheet.cell(
+                    row=5,
+                    column=column,
+                )
+
+                label_cell.value = kpi_labels[index]
+
+                label_cell.fill = PatternFill(
+                    fill_type="solid",
+                    fgColor=SUBTITLE_FILL,
+                )
+
+                label_cell.font = Font(
+                    bold=True,
+                    color=SUBTITLE_FONT,
+                )
+
+                label_cell.alignment = Alignment(
+                    horizontal="center",
+                    vertical="center",
+                )
+
+                value_cell.value = kpi_values[index]
+
+                value_cell.font = Font(
+                    bold=True,
+                    size=11,
+                )
+
+                value_cell.alignment = Alignment(
+                    horizontal="center",
+                    vertical="center",
+                )
+
+                value_cell.border = THIN_BORDER
+
+            sheet.row_dimensions[4].height = 20
+            sheet.row_dimensions[5].height = 24
+
+            # Formati KPI
+            sheet["A5"].number_format = '0.00"%"'
+
+            for cell_reference in (
+                "B5",
+                "C5",
+                "D5",
+            ):
+                sheet[cell_reference].number_format = '0.00 "ms"'
+
+            for cell_reference in (
+                "E5",
+                "F5",
+                "G5",
+                "H5",
+            ):
+                sheet[cell_reference].number_format = "#,##0"
+
+            # --------------------------------------------------
+            # DOWNTIME
+            # --------------------------------------------------
+
+            sheet.merge_cells("A7:B7")
+
+            sheet["A7"] = "Downtime periodo"
+
+            sheet["A7"].fill = PatternFill(
                 fill_type="solid",
                 fgColor=SUBTITLE_FILL,
             )
 
-            label_cell.font = Font(
+            sheet["A7"].font = Font(
                 bold=True,
                 color=SUBTITLE_FONT,
             )
 
-            label_cell.alignment = Alignment(
-                horizontal="center",
+            sheet["A7"].alignment = Alignment(
+                horizontal="left",
                 vertical="center",
             )
 
-            value_cell.value = kpi_values[index]
+            sheet.merge_cells("C7:D7")
 
-            value_cell.font = Font(
+            sheet["C7"] = format_duration(summary_data["downtime_seconds"]
+    )
+            sheet["C7"].number_format = "[h]:mm:ss"
+
+            sheet["C7"].font = Font(
                 bold=True,
-                size=11,
             )
 
-            value_cell.alignment = Alignment(
-                horizontal="center",
-                vertical="center",
+            sheet.merge_cells("E7:H7")
+
+            sheet["E7"] = "Dati temporali"
+
+            sheet["E7"].font = Font(
+                italic=True,
+                color="6C757D",
             )
 
-            value_cell.border = THIN_BORDER
+            # --------------------------------------------------
+            # TABELLA TEMPORALE
+            # --------------------------------------------------
 
-        sheet.row_dimensions[4].height = 20
-        sheet.row_dimensions[5].height = 24
+            headers = [
+                "Data/ora",
+                "Uptime",
+                "Response medio (ms)",
+                "Checks totali",
+                "Checks OK",
+                "Checks KO",
+                "Incidenti",
+                "Downtime",
+            ]
 
-        # Formati KPI
-        sheet["A5"].number_format = '0.00"%"'
-
-        for cell_reference in (
-            "B5",
-            "C5",
-            "D5",
-        ):
-            sheet[cell_reference].number_format = '0.00 "ms"'
-
-        for cell_reference in (
-            "E5",
-            "F5",
-            "G5",
-            "H5",
-        ):
-            sheet[cell_reference].number_format = "#,##0"
-
-        # --------------------------------------------------
-        # DOWNTIME
-        # --------------------------------------------------
-
-        sheet.merge_cells("A7:B7")
-
-        sheet["A7"] = "Downtime periodo"
-
-        sheet["A7"].fill = PatternFill(
-            fill_type="solid",
-            fgColor=SUBTITLE_FILL,
-        )
-
-        sheet["A7"].font = Font(
-            bold=True,
-            color=SUBTITLE_FONT,
-        )
-
-        sheet["A7"].alignment = Alignment(
-            horizontal="left",
-            vertical="center",
-        )
-
-        sheet.merge_cells("C7:D7")
-
-        sheet["C7"] = format_duration(summary_data["downtime_seconds"]
-)
-        sheet["C7"].number_format = "[h]:mm:ss"
-
-        sheet["C7"].font = Font(
-            bold=True,
-        )
-
-        sheet.merge_cells("E7:H7")
-
-        sheet["E7"] = "Dati temporali"
-
-        sheet["E7"].font = Font(
-            italic=True,
-            color="6C757D",
-        )
-
-        # --------------------------------------------------
-        # TABELLA TEMPORALE
-        # --------------------------------------------------
-
-        headers = [
-            "Data/ora",
-            "Uptime",
-            "Response medio (ms)",
-            "Checks totali",
-            "Checks OK",
-            "Checks KO",
-            "Incidenti",
-            "Downtime",
-        ]
-
-        for column, header in enumerate(
-            headers,
-            start=1,
-        ):
-
-            sheet.cell(
-                row=9,
-                column=column,
-            ).value = header
-
-        style_header(
-            sheet,
-            9,
-        )
-
-        # --------------------------------------------------
-        # DATI
-        # --------------------------------------------------
-
-        response_data = {
-            item["date"]: item["average_ms"]
-            for item in statistics["response_time_over_time"]
-        }
-
-        checks_data = {item["date"]: item for item in statistics["checks"]}
-
-        incidents_data = {item["date"]: item for item in statistics["incidents"]}
-
-        uptime_data = {item["date"]: item for item in statistics["uptime"]}
-
-        # PIÙ RECENTE -> PIÙ VECCHIO
-        dates = sorted(
-            uptime_data.keys(),
-            reverse=True,
-        )
-
-        for date in dates:
-
-            uptime_item = uptime_data[date]
-
-            check_item = checks_data.get(
-                date,
-                {
-                    "successful": 0,
-                    "failed": 0,
-                },
-            )
-
-            incident_item = incidents_data.get(
-                date,
-                {
-                    "count": 0,
-                    "downtime_seconds": 0,
-                },
-            )
-
-            row = sheet.max_row + 1
-
-            total_checks = check_item["successful"] + check_item["failed"]
-
-            sheet.append(
-                [
-                    format_datetime(date),
-                    uptime_item["uptime_percentage"],
-                    response_data.get(date),
-                    total_checks,
-                    check_item["successful"],
-                    check_item["failed"],
-                    incident_item["count"],
-                    format_duration(incident_item["downtime_seconds"]),
-                ]
-            )
-
-            sheet.cell(
-                row=row,
-                column=1,
-            ).number_format = "DD/MM/YYYY HH:MM"
-
-            sheet.cell(
-                row=row,
-                column=2,
-            ).number_format = '0.00"%"'
-
-            sheet.cell(
-                row=row,
-                column=3,
-            ).number_format = '0.00 "ms"'
-
-            for column in (
-                4,
-                5,
-                6,
-                7,
+            for column, header in enumerate(
+                headers,
+                start=1,
             ):
+
                 sheet.cell(
-                    row=row,
+                    row=9,
                     column=column,
-                ).number_format = "#,##0"
+                ).value = header
 
-            sheet.cell(
-                row=row,
-                column=8,
-            ).number_format = "[h]:mm:ss"
-
-            for column in range(
-                1,
+            style_header(
+                sheet,
                 9,
-            ):
+            )
+
+            # --------------------------------------------------
+            # DATI
+            # --------------------------------------------------
+
+            response_data = {
+                item["date"]: item["average_ms"]
+                for item in statistics["response_time_over_time"]
+            }
+
+            checks_data = {item["date"]: item for item in statistics["checks"]}
+
+            incidents_data = {item["date"]: item for item in statistics["incidents"]}
+
+            uptime_data = {item["date"]: item for item in statistics["uptime"]}
+
+            # PIÙ RECENTE -> PIÙ VECCHIO
+            dates = sorted(
+                uptime_data.keys(),
+                reverse=True,
+            )
+
+            for date in dates:
+
+                uptime_item = uptime_data[date]
+
+                check_item = checks_data.get(
+                    date,
+                    {
+                        "successful": 0,
+                        "failed": 0,
+                    },
+                )
+
+                incident_item = incidents_data.get(
+                    date,
+                    {
+                        "count": 0,
+                        "downtime_seconds": 0,
+                    },
+                )
+
+                row = sheet.max_row + 1
+
+                total_checks = check_item["successful"] + check_item["failed"]
+
+                sheet.append(
+                    [
+                        format_datetime(date),
+                        uptime_item["uptime_percentage"],
+                        response_data.get(date),
+                        total_checks,
+                        check_item["successful"],
+                        check_item["failed"],
+                        incident_item["count"],
+                        format_duration(incident_item["downtime_seconds"]),
+                    ]
+                )
+
                 sheet.cell(
                     row=row,
-                    column=column,
-                ).border = THIN_BORDER
+                    column=1,
+                ).number_format = "DD/MM/YYYY HH:MM"
 
-        # --------------------------------------------------
-        # FILTRO + FREEZE
-        # --------------------------------------------------
+                sheet.cell(
+                    row=row,
+                    column=2,
+                ).number_format = '0.00"%"'
 
-        last_row = sheet.max_row
+                sheet.cell(
+                    row=row,
+                    column=3,
+                ).number_format = '0.00 "ms"'
 
-        sheet.auto_filter.ref = f"A9:H{last_row}"
+                for column in (
+                    4,
+                    5,
+                    6,
+                    7,
+                ):
+                    sheet.cell(
+                        row=row,
+                        column=column,
+                    ).number_format = "#,##0"
 
-        sheet.freeze_panes = "A10"
+                sheet.cell(
+                    row=row,
+                    column=8,
+                ).number_format = "[h]:mm:ss"
 
-        # --------------------------------------------------
-        # LARGHEZZE
-        # --------------------------------------------------
+                for column in range(
+                    1,
+                    9,
+                ):
+                    sheet.cell(
+                        row=row,
+                        column=column,
+                    ).border = THIN_BORDER
 
-        widths = {
-            "A": 20,
-            "B": 14,
-            "C": 22,
-            "D": 15,
-            "E": 13,
-            "F": 13,
-            "G": 13,
-            "H": 18,
-        }
+            # --------------------------------------------------
+            # FILTRO + FREEZE
+            # --------------------------------------------------
 
-        for column, width in widths.items():
+            last_row = sheet.max_row
 
-            sheet.column_dimensions[column].width = width
+            sheet.auto_filter.ref = f"A9:H{last_row}"
 
-        # --------------------------------------------------
-        # ALLINEAMENTO
-        # --------------------------------------------------
+            sheet.freeze_panes = "A10"
 
-        for row in sheet.iter_rows(
-            min_row=10,
-            max_row=last_row,
-            min_col=2,
-            max_col=8,
-        ):
+            # --------------------------------------------------
+            # LARGHEZZE
+            # --------------------------------------------------
 
-            for cell in row:
+            widths = {
+                "A": 20,
+                "B": 14,
+                "C": 22,
+                "D": 15,
+                "E": 13,
+                "F": 13,
+                "G": 13,
+                "H": 18,
+            }
 
-                cell.alignment = Alignment(
-                    horizontal="center",
-                    vertical="center",
-                )
+            for column, width in widths.items():
+
+                sheet.column_dimensions[column].width = width
+
+            # --------------------------------------------------
+            # ALLINEAMENTO
+            # --------------------------------------------------
+
+            for row in sheet.iter_rows(
+                min_row=10,
+                max_row=last_row,
+                min_col=2,
+                max_col=8,
+            ):
+
+                for cell in row:
+
+                    cell.alignment = Alignment(
+                        horizontal="center",
+                        vertical="center",
+                    )
 
     return workbook
 

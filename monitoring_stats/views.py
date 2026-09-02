@@ -217,30 +217,27 @@ class StatisticsExportView(APIView):
             "",
         ).strip()
 
-        if not monitor_ids_param:
-            raise ValidationError({"monitor_ids": ("Specificare almeno un monitor.")})
+        if monitor_ids_param:
 
-        try:
+            try:
 
-            monitor_ids = [
-                int(value.strip())
-                for value in monitor_ids_param.split(",")
-                if value.strip()
-            ]
+                monitor_ids = [
+                    int(value.strip())
+                    for value in monitor_ids_param.split(",")
+                    if value.strip()
+                ]
 
-        except ValueError:
+            except ValueError:
 
-            raise ValidationError(
-                {"monitor_ids": ("Gli ID dei monitor devono " "essere numerici.")}
-            )
+                raise ValidationError(
+                    {"monitor_ids": ("Gli ID dei monitor devono " "essere numerici.")}
+                )
 
-        if not monitor_ids:
-            raise ValidationError({"monitor_ids": ("Specificare almeno un monitor.")})
+        else:
+
+            monitor_ids = []
 
         monitors = list(Monitor.objects.filter(id__in=monitor_ids).order_by("name"))
-
-        if not monitors:
-            raise ValidationError({"monitor_ids": ("Nessun monitor trovato.")})
 
         include_summary = (
             request.query_params.get(
@@ -250,11 +247,29 @@ class StatisticsExportView(APIView):
             == "true"
         )
 
+        include_monitor_sheets = (
+            request.query_params.get(
+                "include_monitor_sheets",
+                "true",
+            ).lower()
+            == "true"
+        )
+
+        if not monitors and not include_summary:
+
+            raise ValidationError(
+                {
+                    "export": (
+                        "Seleziona almeno un monitor " "oppure il riepilogo generale."
+                    )
+                }
+            )
 
         workbook = build_statistics_workbook(
             monitors=monitors,
             period=period,
             include_summary=include_summary,
+            include_monitor_sheets=include_monitor_sheets,
         )
 
         content = workbook_to_file_response(

@@ -43,6 +43,11 @@ const elements = {
             "include-summary"
         ),
 
+    includeMonitorSheets:
+        document.getElementById(
+            "include-monitor-sheets"
+        ),
+
     exportButton:
         document.getElementById(
             "export-button"
@@ -137,7 +142,7 @@ function renderMonitors() {
                     ||
                     badgesText.includes(query);
 
-                    return matchesSearch
+                return matchesSearch
             }
         );
 
@@ -366,20 +371,35 @@ async function exportData() {
         );
 
 
+    const includeSummary =
+        elements.includeSummary.checked;
+
+    const includeMonitorSheets =
+        elements.includeMonitorSheets.checked;
+
     if (
         selectedMonitors.length === 0
+        &&
+        !includeSummary
     ) {
-
         showExportError(
-            "Seleziona almeno un monitor."
+            "Seleziona almeno un monitor oppure abilita il riepilogo generale."
         );
 
         return;
     }
 
+    if (
+        !includeSummary
+        &&
+        !includeMonitorSheets
+    ) {
+        showExportError(
+            "Seleziona almeno un contenuto da esportare."
+        );
 
-    const includeSummary =
-        elements.includeSummary.checked;
+        return;
+    }
 
 
     const params =
@@ -401,6 +421,13 @@ async function exportData() {
     params.set(
         "include_summary",
         includeSummary
+            ? "true"
+            : "false"
+    );
+
+    params.set(
+        "include_monitor_sheets",
+        includeMonitorSheets
             ? "true"
             : "false"
     );
