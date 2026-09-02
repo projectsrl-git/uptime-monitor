@@ -4,6 +4,8 @@ from incident.models import Incident
 from monitor.models import Monitor
 from monitor.serializer import MonitorReadSerializer
 
+from django.shortcuts import render
+
 
 def home(request):
 
@@ -141,4 +143,11 @@ def monitor_incidents(request, id):
         {
             "monitor": serializer.data,
         },
+    )
+
+
+def export_data_view(request):
+    return render(
+        request,
+        "export_data.html",
     )

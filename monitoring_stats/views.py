@@ -250,24 +250,11 @@ class StatisticsExportView(APIView):
             == "true"
         )
 
-        include_monitor_sheets = (
-            request.query_params.get(
-                "include_monitor_sheets",
-                "true",
-            ).lower()
-            == "true"
-        )
-
-        if not include_summary and not include_monitor_sheets:
-            raise ValidationError(
-                {"export": ("Selezionare almeno " "una sezione da esportare.")}
-            )
 
         workbook = build_statistics_workbook(
             monitors=monitors,
             period=period,
             include_summary=include_summary,
-            include_monitor_sheets=(include_monitor_sheets),
         )
 
         content = workbook_to_file_response(
