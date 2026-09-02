@@ -447,30 +447,39 @@ function renderIncidents(incidents) {
                 ? "border-bottom"
                 : "";
 
-        html += `
-        <div class="${borderClass} py-2">
-
-            <div class="d-flex justify-content-between align-items-center">
-                <strong>${incident.monitor_name}</strong>
-
-                <span class="badge rounded-pill ${incident.is_active
+        const statusClass =
+            incident.is_active
                 ? "bg-danger"
-                : "bg-success"
-            }">
-                    ${incident.is_active
+                : "bg-success";
+
+        const statusText =
+            incident.is_active
                 ? "ATTIVO"
-                : "RISOLTO"
-            }
-                </span>
+                : "RISOLTO";
+
+        html += `
+            <div class="${borderClass} incident-item">
+
+                <div class="incident-monitor-name">
+                    <span
+                        class="incident-status-dot ${incident.is_active
+                                ? "active"
+                                : "resolved"
+                            }"
+                        title="${statusText}"
+                    ></span>
+
+                    <span class="incident-monitor-name-text">
+                        ${incident.monitor_name}
+                    </span>
+                </div>
+
+                <div class="incident-root-cause">
+                    ${incident.root_cause}
+                </div>
 
             </div>
-
-            <small class="text-muted">
-                ${incident.root_cause}
-            </small>
-
-        </div>
-    `;
+        `;
     });
 
     container.innerHTML = html;
