@@ -1,0 +1,49 @@
+from django.urls import path
+
+from .views import (
+    home,
+    add_monitor_page,
+    incidents_page,
+    incident_detail,
+    monitor_detail,
+    edit_monitor_page,
+    monitor_charts,
+    monitor_status,
+    monitor_checks,
+    monitor_incidents,
+    export_data_view,
+    )
+
+urlpatterns = [
+    path("", home, name="dashboard"),
+    path("monitor/add/", add_monitor_page, name="add_monitor"),
+    path("monitor/<int:id>/", monitor_detail, name="monitor_detail"),
+    path("monitor/<int:id>/edit/", edit_monitor_page, name="monitor_edit"),
+    path(
+        "monitor/<int:id>/checks/",
+        monitor_checks,
+        name="monitor_checks",
+    ),
+    path(
+        "monitor/<int:id>/incidents/",
+        monitor_incidents,
+        name="monitor_incidents",
+    ),
+    path(
+        "monitor/<int:id>/charts/",
+        monitor_charts,
+        name="monitor_charts",
+    ),
+    path("incidents/", incidents_page, name="incidents"),
+    path("incidents/<int:id>/", incident_detail, name="incident_detail"),
+    path(
+        "monitor-status/",
+        monitor_status,
+        name="monitor_status",
+    ),
+    path(
+        "esporta-dati/",
+        export_data_view,
+        name="export_data",
+    ),
+]

@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}
+Esporta dati
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <h1 class="mb-4">
+        Esporta dati
+    </h1>
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                Esporta statistiche
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <!-- MONITOR -->
+
+            <div class="mb-4">
+
+                <label
+                    for="monitor-search"
+                    class="form-label"
+                >
+                    Monitor
+                </label>
+
+                <input
+                    type="text"
+                    id="monitor-search"
+                    class="form-control mb-2"
+                    placeholder="Cerca per nome o badge..."
+                >
+
+                <div
+                    id="monitor-list"
+                    class="export-monitor-list"
+                >
+                    Caricamento monitor...
+                </div>
+
+            </div>
+
+
+            <!-- PERIODO -->
+
+            <div class="mb-4">
+
+                <label
+                    for="export-period"
+                    class="form-label"
+                >
+                    Periodo
+                </label>
+
+                <select
+                    id="export-period"
+                    class="form-select"
+                >
+                    <option value="24h">
+                        24 ore
+                    </option>
+
+                    <option value="7d">
+                        7 giorni
+                    </option>
+
+                    <option value="30d">
+                        30 giorni
+                    </option>
+
+                    <option value="365d">
+                        365 giorni
+                    </option>
+                </select>
+
+            </div>
+
+
+            <!-- CONTENUTO -->
+
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Contenuto
+                </label>
+
+                <div class="form-check">
+
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="include-summary"
+                        checked
+                    >
+
+                    <label
+                        class="form-check-label"
+                        for="include-summary"
+                    >
+                        Riepilogo generale
+                    </label>
+
+                </div>
+
+                <div class="form-check">
+
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="include-monitor-sheets"
+                        checked
+                    >
+
+                    <label
+                        class="form-check-label"
+                        for="include-monitor-sheets"
+                    >
+                        Scheda per ogni monitor
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- ERRORE -->
+
+            <div
+                id="export-error"
+                class="alert alert-danger d-none"
+                role="alert"
+            ></div>
+
+
+            <!-- AZIONE -->
+
+            <div class="d-flex justify-content-end">
+
+                <button
+                    type="button"
+                    id="export-button"
+                    class="btn btn-primary rounded-pill"
+                >
+                    Scarica Excel
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+
+{% load static %}
+
+<script
+    src="{% static 'js/export_data.js' %}"
+></script>
+
+{% endblock %}

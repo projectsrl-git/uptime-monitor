@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Incidenti
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Incidenti</h1>
+    </div>
+
+        <!-- STATISTICHE INCIDENTI -->
+    <div class="row row-cols-2 row-cols-lg-4 g-2 mb-3">
+
+        <div class="col">
+            <div class="card incident-stat-card h-100">
+                <div class="card-body">
+                    <div class="incident-stat-period">
+                        24 ore
+                    </div>
+
+                    <div class="incident-stat-label">
+                        Incidenti
+                    </div>
+
+                    <div
+                        id="incidents-24h"
+                        class="incident-stat-value">
+                        -
+                    </div>
+
+                    <div class="incident-stat-details">
+                        <span>
+                            Attivi:
+                            <strong id="incidents-active-24h">-</strong>
+                        </span>
+
+                        <span>
+                            Downtime:
+                            <strong id="incidents-downtime-24h">-</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col">
+            <div class="card incident-stat-card h-100">
+                <div class="card-body">
+                    <div class="incident-stat-period">
+                        7 giorni
+                    </div>
+
+                    <div class="incident-stat-label">
+                        Incidenti
+                    </div>
+
+                    <div
+                        id="incidents-7d"
+                        class="incident-stat-value">
+                        -
+                    </div>
+
+                    <div class="incident-stat-details">
+                        <span>
+                            Attivi:
+                            <strong id="incidents-active-7d">-</strong>
+                        </span>
+
+                        <span>
+                            Downtime:
+                            <strong id="incidents-downtime-7d">-</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col">
+            <div class="card incident-stat-card h-100">
+                <div class="card-body">
+                    <div class="incident-stat-period">
+                        30 giorni
+                    </div>
+
+                    <div class="incident-stat-label">
+                        Incidenti
+                    </div>
+
+                    <div
+                        id="incidents-30d"
+                        class="incident-stat-value">
+                        -
+                    </div>
+
+                    <div class="incident-stat-details">
+                        <span>
+                            Attivi:
+                            <strong id="incidents-active-30d">-</strong>
+                        </span>
+
+                        <span>
+                            Downtime:
+                            <strong id="incidents-downtime-30d">-</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col">
+            <div class="card incident-stat-card h-100">
+                <div class="card-body">
+                    <div class="incident-stat-period">
+                        365 giorni
+                    </div>
+
+                    <div class="incident-stat-label">
+                        Incidenti
+                    </div>
+
+                    <div
+                        id="incidents-365d"
+                        class="incident-stat-value">
+                        -
+                    </div>
+
+                    <div class="incident-stat-details">
+                        <span>
+                            Attivi:
+                            <strong id="incidents-active-365d">-</strong>
+                        </span>
+
+                        <span>
+                            Downtime:
+                            <strong id="incidents-downtime-365d">-</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row mb-3 align-items-center">
+
+        <!-- ricerca -->
+        <div class="col-lg-5">
+            <input
+                type="text"
+                id="search-incident"
+                class="form-control"
+                placeholder="Cerca nome monitor..."
+            >
+        </div>
+
+        <!-- ordinamento -->
+        <div class="col-lg-4">
+            <select id="ordering-incident" class="form-select">
+                <option value="-started_at">Più recenti</option>
+                <option value="started_at">Più vecchi</option>
+            </select>
+        </div>
+
+        <!-- filtro -->
+        <div class="col-lg-3">
+            <select id="status-filter" class="form-select">
+                <option value="">Tutti</option>
+                <option value="active">Attivi</option>
+                <option value="resolved">Risolti</option>
+            </select>
+        </div>
+
+    </div>
+    
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Stato</th>
+                            <th>Monitor</th>
+                            <th>Causa</th>
+                            <th>Inizio</th>
+                            <th>Fine</th>
+                            <th>Durata</th>
+                        </tr>
+                    </thead>
+                    <tbody id="incident-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="pagination" class="d-flex justify-content-center mt-4"></div>
+    
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/incidents.js' %}"></script>
+{% endblock %}
