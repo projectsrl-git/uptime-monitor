@@ -1,5 +1,5 @@
 from django.utils import timezone
-from django.db.models import Avg, Min, Max
+from django.db.models import Avg, Min, Max, Q
 
 
 def calculate_uptime(monitor, start_date, end_date):
@@ -49,8 +49,7 @@ def calculate_uptime(monitor, start_date, end_date):
 def get_incidents_in_period(monitor, start_date, end_date):
     return monitor.incidents.filter(
         started_at__lte=end_date,
-        ended_at__gte=start_date,
-    )
+    ).filter(Q(ended_at__gte=start_date) | Q(ended_at__isnull=True))
 
 
 def get_total_downtime(monitor, start_date, end_date):
@@ -105,10 +104,9 @@ def get_mtbf(monitor, start_date, end_date):
 
     total_seconds = (end_date - start_date).total_seconds()
 
-    incidents_count = get_incidents_in_period(
-        monitor,
-        start_date,
-        end_date,
+    incidents_count = monitor.incidents.filter(
+        started_at__gte=start_date,
+        started_at__lt=end_date,
     ).count()
 
     if incidents_count == 0:

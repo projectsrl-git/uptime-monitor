@@ -55,5 +55,16 @@ class Monitor(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def status(self):
+
+        if not self.is_active:
+            return "paused"
+
+        if not self.has_run_first_check:
+            return "not_started"
+
+        return "down" if self.incidents.filter(ended_at__isnull=True).exists() else "up"
+
     def __str__(self):
         return self.name

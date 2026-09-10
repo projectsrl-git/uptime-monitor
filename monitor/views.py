@@ -1,20 +1,143 @@
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
+from rest_framework.filters import OrderingFilter
 
-from django.db.models import Q
+from django.db.models import Q, Exists, OuterRef
 
 from .models import Monitor
+from incident.models import Incident
 from check.serializer import CheckSerializer
 from incident.serializer import IncidentSerializer
-from .serializer import MonitorSerializer
+from .serializer import MonitorReadSerializer, MonitorWriteSerializer
 from .services.period_service import get_period_range, parse_date
 from .services.uptime_service import calculate_uptime
+from .pagination import StandardResultsSetPagination
+
+VALID_STATUS = (
+    "up",
+    "down",
+    "paused",
+    "not_started",
+)
 
 
 class MonitorViewSet(viewsets.ModelViewSet):
     queryset = Monitor.objects.all()
-    serializer_class = MonitorSerializer
+
+    filter_backends = [OrderingFilter]
+
+    ordering_fields = [
+        "name",
+        "created_at",
+    ]
+
+    ordering = [
+        "name",
+    ]
+
+    pagination_class = StandardResultsSetPagination
+
+    def get_serializer_class(self):
+
+        if self.action in (
+            "create",
+            "update",
+            "partial_update",
+        ):
+            return MonitorWriteSerializer
+
+        return MonitorReadSerializer
+
+    def get_queryset(self):
+
+        queryset = super().get_queryset()
+
+        open_incidents = Incident.objects.filter(
+            monitor=OuterRef("pk"),
+            ended_at__isnull=True,
+        )
+
+        queryset = queryset.annotate(has_open_incident=Exists(open_incidents))
+
+        status = self.request.query_params.get("status")
+
+        if status is None:
+            return queryset
+
+        if status not in VALID_STATUS:
+            raise ValidationError(
+                {
+                    "status": (
+                        "Valore non valido. "
+                        f"Valori consentiti: {', '.join(VALID_STATUS)}"
+                    )
+                }
+            )
+
+        if status == "paused":
+            return queryset.filter(is_active=False)
+
+        if status == "not_started":
+            return queryset.filter(
+                is_active=True,
+                has_run_first_check=False,
+            )
+
+        if status == "down":
+            return queryset.filter(
+                has_open_incident=True,
+            )
+
+        if status == "up":
+            return queryset.filter(
+                is_active=True,
+                has_run_first_check=True,
+                has_open_incident=False,
+            )
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+
+        ordering = request.query_params.get("ordering")
+
+        if ordering not in ("status", "-status"):
+            return super().list(request, *args, **kwargs)
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        if ordering == "status":
+            priority = {
+                "up": 0,
+                "down": 1,
+                "paused": 2,
+                "not_started": 3,
+            }
+
+        else:  # -status
+            priority = {
+                "down": 0,
+                "up": 1,
+                "paused": 2,
+                "not_started": 3,
+            }
+
+        monitors = sorted(
+            queryset,
+            key=lambda monitor: priority[monitor.status],
+        )
+
+        page = self.paginate_queryset(monitors)
+
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(monitors, many=True)
+
+        return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         monitor = self.get_object()
@@ -105,12 +228,21 @@ class MonitorCheckHistoryView(APIView):
                 executed_at__lte=to_date,
             )
 
-        serializer = CheckSerializer(
+        paginator = StandardResultsSetPagination()
+
+        page = paginator.paginate_queryset(
             checks,
+            request,
+        )
+
+        serializer = CheckSerializer(
+            page,
             many=True,
         )
 
-        return Response(serializer.data)
+        return paginator.get_paginated_response(
+            serializer.data,
+        )
 
 
 class MonitorIncidentHistoryView(APIView):
@@ -153,9 +285,19 @@ class MonitorIncidentHistoryView(APIView):
             incidents = incidents.filter(
                 started_at__lte=to_date,
             )
-        serializer = IncidentSerializer(
+
+        paginator = StandardResultsSetPagination()
+
+        page = paginator.paginate_queryset(
             incidents,
+            request,
+        )
+
+        serializer = IncidentSerializer(
+            page,
             many=True,
         )
 
-        return Response(serializer.data)
+        return paginator.get_paginated_response(
+            serializer.data,
+        )
