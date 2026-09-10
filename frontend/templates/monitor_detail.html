@@ -45,12 +45,14 @@ Monitor #{{ monitor.id }}
             </a>
 
             <!-- duplica -->
-            <form method="post" action="{% url 'monitor_duplicate' monitor.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary rounded-pill">
-                    Duplica
-                </button>
-            </form>
+            <button
+                type="button"
+                id="duplicate-monitor-btn"
+                class="btn btn-primary rounded-pill"
+                data-monitor-id="{{ monitor.id }}"
+                data-success-url="{% url 'dashboard' %}">
+                Duplica
+            </button>
 
             <!-- disattiva/attiva -->
             {% if monitor.is_active %}

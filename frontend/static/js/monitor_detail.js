@@ -9,6 +9,46 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
+    // duplica
+    const duplicateButton = document.getElementById(
+        "duplicate-monitor-btn"
+    );
+
+    if (duplicateButton) {
+
+        duplicateButton.addEventListener("click", async () => {
+
+            const monitorId = duplicateButton.dataset.monitorId;
+
+            const confirmed = confirm(
+                "Vuoi duplicare questo monitor?"
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            const response = await fetch(
+                `/api/monitors/${monitorId}/duplicate/`,
+                {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken"),
+                    },
+                }
+            );
+
+            if (response.ok) {
+                window.location.href = duplicateButton.dataset.successUrl;
+                return;
+            }
+
+            alert("Errore durante la duplicazione del monitor.");
+        });
+    }
+
+
+    // disattiva
     const deactivateButton = document.getElementById(
         "deactivate-monitor-btn"
     );
@@ -47,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+    // attiva
     const activateButton = document.getElementById(
         "activate-monitor-btn"
     );
@@ -83,6 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Errore durante la riattivazione del monitor.");
         });
     }
+
 });
 
 
