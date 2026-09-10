@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
 {% block title %}
+{% if monitor %}
+Modifica Monitor
+{% else %}
 Nuovo Monitor
+{% endif %}
 {% endblock %}
 
 
@@ -10,12 +14,16 @@ Nuovo Monitor
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>
-            Nuovo Monitor
+            {% if monitor %}
+                Modifica Monitor
+            {% else %}
+                Nuovo Monitor
+            {% endif %}
         </h1>
 
         <a href="{% url 'dashboard' %}"
            class="btn btn-outline-secondary rounded-pill">
-            Torna alla dashboard
+            Annulla
         </a>
     </div>
 
@@ -41,8 +49,8 @@ Nuovo Monitor
         </div>
 
         <div class="card-body">
-            <form method="post">
-
+            <form method="post"
+                action="{% if monitor %}{% url 'monitor_edit' monitor.id %}{% else %}{% url 'add_monitor' %}{% endif %}">
             {% csrf_token %}
 
             <!-- dati principali -->
@@ -60,6 +68,7 @@ Nuovo Monitor
                         type="text"
                         name="name"
                         class="form-control"
+                        value="{{ monitor.name|default:'' }}"
                         required>
                 </div>
 
@@ -73,6 +82,7 @@ Nuovo Monitor
                         name="url"
                         class="form-control"
                         placeholder="https://example.com"
+                        value="{{ monitor.url|default:'' }}"
                         required>
                 </div>
             </div>
@@ -88,7 +98,7 @@ Nuovo Monitor
                             type="number"
                             name="check_interval_seconds"
                             class="form-control"
-                            value="60"
+                            value="{{ monitor.check_interval_seconds|default:60 }}"
                             min="1">
 
                         <span class="input-group-text">
@@ -107,7 +117,7 @@ Nuovo Monitor
                             type="number"
                             name="timeout_seconds"
                             class="form-control"
-                            value="30"
+                            value="{{ monitor.timeout_seconds|default:30 }}"
                             min="1">
 
                         <span class="input-group-text">
@@ -145,6 +155,7 @@ Nuovo Monitor
                     type="text"
                     name="badges"
                     class="form-control"
+                    value="{% if monitor %}{{ monitor.badges|join:', ' }}{% endif %}"
                     placeholder="badge1, badge2, badge3">
 
                 <div class="form-text">
@@ -171,7 +182,8 @@ Nuovo Monitor
 
                         {% for value,label in http_methods %}
 
-                        <option value="{{ value }}">
+                        <option value="{{ value }}"
+                            {% if monitor.http_method == value %}selected{% endif %}>
                             {{ label }}
                         </option>
 
@@ -188,11 +200,13 @@ Nuovo Monitor
                         name="follow_redirects"
                         class="form-select">
 
-                        <option value="true" selected>
+                        <option value="true"
+                            {% if not monitor or monitor.follow_redirects %}selected{% endif %}>
                             Segui redirect
                         </option>
 
-                        <option value="false">
+                        <option value="false"
+                            {% if monitor and not monitor.follow_redirects %}selected{% endif %}>
                             Non seguire redirect
                         </option>
                     </select>
@@ -209,7 +223,8 @@ Nuovo Monitor
 
                         {% for value, label in ip_versions %}
 
-                            <option value="{{ value }}">
+                            <option value="{{ value }}"
+                                {% if monitor.ip_version == value %}selected{% endif %}>
                                 {{ label }}
                             </option>
 
@@ -227,7 +242,7 @@ Nuovo Monitor
                     type="text"
                     name="accepted_status_codes"
                     class="form-control"
-                    value="2xx,3xx">
+                    value="{% if monitor %}{{ monitor.accepted_status_codes|join:', ' }}{% else %}2xx,3xx{% endif %}"> 
             </div>
 
             <hr>
@@ -246,8 +261,7 @@ Nuovo Monitor
                     name="request_headers"
                     class="form-control"
                     rows="4"
-                    placeholder='{"Authorization":"Bearer token"}'></textarea>
-            </div>
+                    placeholder='{"Authorization":"Bearer token"}'>{% if monitor.request_headers %}{{ monitor.request_headers|safe }}{% endif %}</textarea>            </div>
 
             <div class="mb-3">
                 <label class="form-label">
@@ -257,14 +271,14 @@ Nuovo Monitor
                 <textarea
                     name="request_body"
                     class="form-control"
-                    rows="4"></textarea>
-            </div>
+                    rows="4">{% if monitor %}{{ monitor.request_body|default:'' }}{% endif %}</textarea>            </div>
 
             <div class="form-check mb-4">
                 <input
                     class="form-check-input"
                     type="checkbox"
-                    name="send_body_as_json">
+                    name="send_body_as_json"
+                    {% if monitor.send_body_as_json %}checked{% endif %}>
 
                 <label class="form-check-label">
                     Invia body come JSON
@@ -289,19 +303,16 @@ Nuovo Monitor
                         name="auth_type"
                         class="form-select">
 
-                        <select
-                            name="auth_type"
-                            class="form-select">
+                        {% for value, label in auth_types %}
 
-                            {% for value, label in auth_types %}
+                            <option value="{{ value }}"
+                                {% if monitor.auth_type == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
 
-                                <option value="{{ value }}">
-                                    {{ label }}
-                                </option>
-
-                            {% endfor %}
-                        </select>
+                        {% endfor %}
                     </select>
+
                 </div>
 
                 <div class="col-md-4 mb-3">
@@ -312,7 +323,8 @@ Nuovo Monitor
                     <input
                         type="text"
                         name="auth_username"
-                        class="form-control">
+                        class="form-control"
+                        value="{{ monitor.auth_username|default:'' }}">
                 </div>
 
                 <div class="col-md-4 mb-3">
@@ -324,7 +336,8 @@ Nuovo Monitor
                     <input
                         type="password"
                         name="auth_password"
-                        class="form-control">
+                        class="form-control"
+                        value="{{ monitor.auth_password|default:'' }}">
                 </div>
             </div>
 
@@ -345,7 +358,8 @@ Nuovo Monitor
                         type="number"
                         name="consecutive_failures_threshold"
                         class="form-control"
-                        value="2">
+                        value="2"
+                        value="{{ monitor.consecutive_failures_threshold|default:2 }}">
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -358,7 +372,8 @@ Nuovo Monitor
                         <input
                             type="number"
                             name="slow_response_threshold_ms"
-                            class="form-control">
+                            class="form-control"
+                            value="{{ monitor.slow_response_threshold_ms|default:'' }}">
 
                         <span class="input-group-text">
                             ms
@@ -370,7 +385,11 @@ Nuovo Monitor
             <div class="d-flex justify-content-end mt-4">
                 <button
                     class="btn btn-primary rounded-pill px-4">
-                    Crea Monitor
+                    {% if monitor %}
+                        Salva modifiche
+                    {% else %}
+                        Crea Monitor
+                    {% endif %}
                 </button>
             </div>
 
