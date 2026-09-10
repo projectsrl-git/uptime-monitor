@@ -23,4 +23,6 @@ urlpatterns = [
     path("", include("frontend.urls")),
     path("api/", include("monitor.urls")),
     path("api/", include("incident.urls")),
+    path("api/statistics/", include("monitoring_stats.urls"),
+    ),
 ]
