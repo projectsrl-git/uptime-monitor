@@ -10,23 +10,41 @@ Monitor #{{ monitor.id }}
 <div class="container py-5">
 
     <!-- header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-start mb-4">
         <div>
             <h1 class="mb-1">
                 {{ monitor.name }}
             </h1>
-
-            <div class="text-muted text-break">
+            
+            <div class="text-muted text-break mb-2">
                 {{ monitor.url }}
+            </div>
+            
+            <!-- badge -->
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="text-muted small">
+                    Badge:
+                </span>
+
+                {% if monitor.badges %}
+                    {% for badge in monitor.badges %}
+                        <span class="badge rounded-pill text-bg-secondary px-3 py-2">
+                            {{ badge }}
+                        </span>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-muted small">
+                        Nessun badge
+                    </span>
+                {% endif %}
             </div>
         </div>
 
         <a href="{% url 'dashboard' %}"
-           class="btn btn-outline-secondary rounded-pill">
+        class="btn btn-outline-secondary rounded-pill">
             Lista monitor
         </a>
     </div>
-
 
     <!-- sommario -->
     <div class="card shadow-sm mb-4">
@@ -83,7 +101,7 @@ Monitor #{{ monitor.id }}
 
                 <div class="col-md-3 border-end">
                     <div class="text-muted small">
-                        Response time
+                        Ultima risposta
                     </div>
 
                     <div class="fw-semibold mt-1">
@@ -171,7 +189,7 @@ Monitor #{{ monitor.id }}
 
                     <div class="fw-semibold mt-1">
                         {% for code in monitor.accepted_status_codes %}
-                            <span class="badge text-bg-primary rounded-pill px-3 py-2 me-1">
+                            <span class="badge text-bg-secondary rounded-pill px-3 py-2 me-1">
                                 {{ code }}
                             </span>
                         {% endfor %}

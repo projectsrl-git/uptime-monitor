@@ -52,6 +52,10 @@ def prepare_monitor_data(data):
         code.strip() for code in data["accepted_status_codes"].split(",")
     ]
 
+    data["badges"] = [
+        badge.strip() for badge in data.get("badges", "").split(",") if badge.strip()
+    ]
+
     if data.get("slow_response_threshold_ms") == "":
         data["slow_response_threshold_ms"] = None
 

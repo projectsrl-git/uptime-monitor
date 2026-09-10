@@ -54,6 +54,13 @@ body.dashboard-page {
     cursor: pointer;
 }
 
+.monitor-custom-badge {
+    font-size: .7rem;
+    font-weight: 500;
+    padding: .18rem .4rem;
+    white-space: nowrap;
+    align-content: flex-start;
+}
 
 /**********/
 /* BADGES */
