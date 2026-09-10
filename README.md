@@ -26,6 +26,20 @@ L'applicazione permette di monitorare periodicamente endpoint HTTP/HTTPS, regist
 - Soft delete (disattivazione)
 - Validazione URL HTTP/HTTPS
 
+### BR2 - Esecuzione dei check
+
+- Modello `Check` per la registrazione dello storico
+- Esecuzione manuale dei check tramite management command (`run_checks`)
+- Richieste HTTP configurabili (metodo e timeout)
+- Registrazione di:
+  - timestamp
+  - esito del check
+  - tempo di risposta
+  - codice HTTP
+  - eventuale messaggio di errore
+- Esecuzione dei check solo per monitor attivi
+- Rispetto dell'intervallo di controllo configurato per ciascun monitor
+
 ---
 
 ## Installazione
@@ -79,8 +93,16 @@ python manage.py createsuperuser
 
 ## Avvio
 
+Avviare il server:
+
 ```bash
 python manage.py runserver
+```
+
+Eseguire manualmente i check:
+
+```bash
+python manage.py run_checks
 ```
 
 Admin:
@@ -100,7 +122,7 @@ http://127.0.0.1:8000/api/monitors/
 ## Roadmap
 
 - [x] BR1 - CRUD Monitor
-- [ ] BR2 - Scheduler e Check
+- [x] BR2 - Scheduler e Check
 - [ ] BR3 - Incidenti
 - [ ] BR4 - Notifiche
 - [ ] BR5 - Uptime
