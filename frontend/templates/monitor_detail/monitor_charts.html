@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Analisi grafici - {{ monitor.name }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="mb-1">
+                {{ monitor.name }}
+            </h1>
+
+            <div class="text-muted">
+                Analisi grafici
+            </div>
+        </div>
+
+        <a
+            href="{% url 'monitor_detail' monitor.id %}"
+            class="btn btn-outline-secondary rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i>
+            Torna al monitor
+        </a>
+
+    </div>
+
+
+    <!-- PERIODO -->
+    <div class="d-flex justify-content-center mb-4">
+
+        <div class="btn-group btn-group-sm stats-period" role="group">
+
+            <button
+                type="button"
+                class="btn active statistics-period"
+                data-period="24h">
+                24 ore
+            </button>
+
+            <button
+                type="button"
+                class="btn statistics-period"
+                data-period="7d">
+                7 giorni
+            </button>
+
+            <button
+                type="button"
+                class="btn statistics-period"
+                data-period="30d">
+                30 giorni
+            </button>
+
+            <button
+                type="button"
+                class="btn statistics-period"
+                data-period="365d">
+                365 giorni
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- UPTIME -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                Uptime nel tempo
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <div style="height: 400px;">
+                <canvas id="uptime-chart"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RESPONSE TIME -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                Response time nel tempo
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <div style="height: 400px;">
+                <canvas id="response-time-chart"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CHECK -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                Check nel tempo
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <div style="height: 400px;">
+                <canvas id="checks-chart"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- INCIDENTI -->
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                Incidenti nel tempo
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <div style="height: 400px;">
+                <canvas id="incidents-chart"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block javascript %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const monitorId = {{ monitor.id }};
+</script>
+
+<script src="{% static 'js/monitor_charts.js' %}"></script>
+
+{% endblock %}

@@ -125,6 +125,71 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    const configurationButton = document.getElementById(
+        "configuration-tab"
+    );
+
+    const overviewContent = document.getElementById(
+        "overview-content"
+    );
+
+    const configurationContent = document.getElementById(
+        "configuration-content"
+    );
+
+
+    if (
+        configurationButton &&
+        overviewContent &&
+        configurationContent
+    ) {
+
+        configurationButton.addEventListener("click", () => {
+
+            const configurationVisible =
+                !configurationContent.classList.contains("d-none");
+
+
+            if (configurationVisible) {
+
+                // Torna alle statistiche
+
+                configurationContent.classList.add("d-none");
+                overviewContent.classList.remove("d-none");
+
+                configurationButton.textContent = "Configurazione";
+
+                configurationButton.classList.remove(
+                    "btn-primary"
+                );
+                
+                configurationButton.classList.add(
+                    "btn-outline-primary"
+                );
+
+            } else {
+
+                // Mostra configurazione
+
+                overviewContent.classList.add("d-none");
+                configurationContent.classList.remove("d-none");
+
+                configurationButton.textContent = "Statistiche";
+
+                configurationButton.classList.remove(
+                    "btn-primary"
+                );
+                
+                configurationButton.classList.add(
+                    "btn-outline-primary"
+                );
+
+            }
+
+        });
+
+    }
+
 });
 
 

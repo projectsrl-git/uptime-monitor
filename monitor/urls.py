@@ -1,6 +1,8 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
+from monitoring_stats.views import MonitorStatisticsView
+
 from .views import (
     MonitorViewSet,
     MonitorUptimeView,
@@ -22,5 +24,10 @@ urlpatterns = [
     path(
         "monitors/<int:pk>/incidents/",
         MonitorIncidentHistoryView.as_view(),
+    ),
+    path(
+        "monitors/<int:pk>/statistics/",
+        MonitorStatisticsView.as_view(),
+        name="monitor_statistics",
     ),
 ]
