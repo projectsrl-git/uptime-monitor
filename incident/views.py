@@ -1,6 +1,11 @@
+from datetime import timedelta
+
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.filters import OrderingFilter
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 from .models import Incident
 from .serializer import IncidentSerializer
@@ -60,3 +65,62 @@ class IncidentViewSet(viewsets.ReadOnlyModelViewSet):
             )
 
         return queryset
+
+
+class IncidentStatisticsView(APIView):
+
+    PERIODS = {
+        "24h": timedelta(hours=24),
+        "7d": timedelta(days=7),
+        "30d": timedelta(days=30),
+        "365d": timedelta(days=365),
+    }
+
+    def get(self, request):
+
+        now = timezone.now()
+
+        statistics = {}
+
+        for period, delta in self.PERIODS.items():
+
+            period_start = now - delta
+
+            incidents = Incident.objects.filter(
+                started_at__lt=now,
+            ).filter(Q(ended_at__isnull=True) | Q(ended_at__gt=period_start))
+
+            incident_count = Incident.objects.filter(
+                started_at__gte=period_start,
+                started_at__lte=now,
+            ).count()
+
+            active_count = incidents.filter(ended_at__isnull=True).count()
+
+            downtime_seconds = 0
+
+            for incident in incidents:
+
+                incident_start = max(
+                    incident.started_at,
+                    period_start,
+                )
+
+                incident_end = min(
+                    incident.ended_at or now,
+                    now,
+                )
+
+                if incident_end > incident_start:
+
+                    downtime_seconds += int(
+                        (incident_end - incident_start).total_seconds()
+                    )
+
+            statistics[period] = {
+                "incidents": incident_count,
+                "active": active_count,
+                "downtime_seconds": downtime_seconds,
+            }
+
+        return Response(statistics)

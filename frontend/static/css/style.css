@@ -8,8 +8,7 @@ body {
     background-color: #212529;
 }
 
-body.dashboard-page,
-body.incidents-page {
+body.dashboard-page {
     overflow: hidden;
 }
 
@@ -74,7 +73,6 @@ body.incidents-page {
     color: #17b932 !important;
 }
 
-
 /*************/
 /* DASHBOARD */
 /*************/
@@ -112,7 +110,7 @@ body.incidents-page {
     padding-right: 8px;
 }
 
-.dashboard-monitor-body:hover {
+.card-body.py-1:hover {
     background-color: #343a40;
     border-color: #adb5bd;
 
@@ -149,6 +147,78 @@ body.incidents-page {
     font-style: italic;
 }
 
+.dashboard-side-column {
+    min-height: 0;
+}
+
+.incident-item {
+    padding: .65rem 0;
+}
+
+.incident-monitor-name {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+
+    color: #f8f9fa;
+
+    font-size: .82rem;
+    font-weight: 600;
+
+    line-height: 1.3;
+}
+
+.incident-monitor-name-text {
+    min-width: 0;
+}
+
+.incident-status-dot {
+    flex-shrink: 0;
+
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+}
+
+.incident-status-dot.active {
+    background-color: #dc3545;
+}
+
+.incident-status-dot.resolved {
+    background-color: #17b932;
+}
+
+.incident-root-cause {
+    margin-top: .25rem;
+
+    color: #868e96;
+
+    font-size: .72rem;
+    line-height: 1.3;
+}
+
+.incident-status-dot {
+    display: inline-block;
+
+    width: 8px;
+    height: 8px;
+
+    margin-left: .35rem;
+
+    border-radius: 50%;
+
+    vertical-align: middle;
+}
+
+.incident-status-dot.active {
+    background-color: #dc3545;
+}
+
+.incident-status-dot.resolved {
+    background-color: #17b932;
+}
+
 
 /**************/
 /* STATISTICS */
@@ -174,7 +244,7 @@ body.incidents-page {
     padding: 12px 14px;
 }
 
-.general-statistics .card-header h5 {
+.card-header h5 {
     color: #f8f9fa;
 
     font-size: .95rem;
@@ -737,6 +807,65 @@ body.incidents-page {
     transition:
         background-color .15s ease,
         border-color .15s ease;
+}
+
+/**********************/
+/* INCIDENT STATISTICS */
+/**********************/
+
+.incident-stat-card {
+    background-color: #2b3035;
+}
+
+.incident-stat-card .card-body {
+    padding: 1rem;
+}
+
+.incident-stat-period {
+    margin-bottom: .4rem;
+
+    color: #868e96;
+
+    font-size: .75rem;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.incident-stat-label {
+    color: #adb5bd;
+
+    font-size: .8rem;
+    font-weight: 500;
+}
+
+.incident-stat-value {
+    margin: .1rem 0 .6rem;
+
+    color: #f8f9fa;
+
+    font-size: 1.6rem;
+    line-height: 1.1;
+    font-weight: 700;
+}
+
+.incident-stat-details {
+    display: flex;
+    flex-direction: column;
+
+    gap: .25rem;
+
+    color: #868e96;
+
+    font-size: .75rem;
+    line-height: 1.2;
+}
+
+.incident-stat-details strong {
+    color: #dee2e6;
+
+    font-weight: 600;
 }
 
 
