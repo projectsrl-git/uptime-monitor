@@ -1,8 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 
 from incident.models import Incident
 from monitor.models import Monitor
-from monitor.serializer import MonitorWriteSerializer
+from monitor.serializer import MonitorReadSerializer, MonitorWriteSerializer
 
 def home(request):
 
@@ -75,3 +75,17 @@ def incident_detail(request, id):
     incident = Incident.objects.get(id=id)
 
     return render(request, "incident_detail.html", {"incident": incident})
+
+
+def monitor_detail(request, id):
+    monitor = get_object_or_404(Monitor, id=id)
+
+    serializer = MonitorReadSerializer(monitor)
+
+    return render(
+        request,
+        "monitor_detail.html",
+        {
+            "monitor": serializer.data,
+        },
+    )

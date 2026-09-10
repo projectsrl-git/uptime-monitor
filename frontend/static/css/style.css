@@ -428,3 +428,34 @@ body.dashboard-page {
 #stats-response {
     color: #e9ecef;
 }
+
+/****************/
+/* MONITOR URL  */
+/****************/
+
+.monitor-url {
+    background-color: #212529;
+    border: 1px solid #495057;
+    border-radius: 8px;
+
+    padding: 12px 14px;
+
+    color: #e9ecef;
+
+    font-family:
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        "Liberation Mono",
+        "Courier New",
+        monospace;
+
+    font-size: .9rem;
+
+    word-break: break-all;
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease;
+}

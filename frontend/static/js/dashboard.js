@@ -167,6 +167,12 @@ async function renderMonitors(monitors) {
 
         setStatusBadge(status, monitor.status);
 
+        cardElement.style.cursor = "pointer";
+
+        cardElement.addEventListener("click", () => {
+            window.location.href = `/monitor/${monitor.id}/`;
+        });
+
         fragment.appendChild(card);
 
         statsPromises.push(
