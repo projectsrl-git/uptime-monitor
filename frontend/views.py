@@ -112,3 +112,33 @@ def monitor_status(request):
         request,
         "monitor_status.html",
     )
+
+
+def monitor_checks(request, id):
+
+    monitor = get_object_or_404(Monitor, id=id)
+
+    serializer = MonitorReadSerializer(monitor)
+
+    return render(
+        request,
+        "monitor_detail/monitor_checks.html",
+        {
+            "monitor": serializer.data,
+        },
+    )
+
+
+def monitor_incidents(request, id):
+
+    monitor = get_object_or_404(Monitor, id=id)
+
+    serializer = MonitorReadSerializer(monitor)
+
+    return render(
+        request,
+        "monitor_detail/monitor_incidents.html",
+        {
+            "monitor": serializer.data,
+        },
+    )

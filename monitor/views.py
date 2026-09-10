@@ -1,3 +1,6 @@
+from datetime import datetime, time
+from django.utils import timezone
+
 from rest_framework.views import APIView
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -246,6 +249,18 @@ class MonitorUptimeView(APIView):
 
 class MonitorCheckHistoryView(APIView):
 
+    VALID_ORDERING = (
+        "executed_at",
+        "-executed_at",
+        "response_time_ms",
+        "-response_time_ms",
+    )
+
+    VALID_SUCCESS = (
+        "true",
+        "false",
+    )
+
     def get(self, request, pk):
 
         try:
@@ -259,6 +274,10 @@ class MonitorCheckHistoryView(APIView):
 
         checks = monitor.checks.all()
 
+        # ==========================
+        # FILTRO DATA
+        # ==========================
+
         try:
             from_date = parse_date(request.query_params.get("from"))
 
@@ -271,14 +290,84 @@ class MonitorCheckHistoryView(APIView):
             )
 
         if from_date:
+            from_datetime = datetime.combine(
+                from_date,
+                time.min,
+            )
+
+            if timezone.is_naive(from_datetime):
+                from_datetime = timezone.make_aware(
+                    from_datetime,
+                    timezone.get_current_timezone(),
+                )
+
             checks = checks.filter(
-                executed_at__gte=from_date,
+                executed_at__gte=from_datetime,
             )
 
         if to_date:
-            checks = checks.filter(
-                executed_at__lte=to_date,
+            to_datetime = datetime.combine(
+                to_date,
+                time.max,
             )
+
+            if timezone.is_naive(to_datetime):
+                to_datetime = timezone.make_aware(
+                    to_datetime,
+                    timezone.get_current_timezone(),
+                )
+
+            checks = checks.filter(
+                executed_at__lte=to_datetime,
+            )
+
+        # ==========================
+        # FILTRO SUCCESS
+        # ==========================
+
+        success = request.query_params.get("success")
+
+        if success is not None:
+
+            if success not in self.VALID_SUCCESS:
+                return Response(
+                    {
+                        "detail": (
+                            "Valore non valido per 'success'. "
+                            "Valori consentiti: true, false"
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            checks = checks.filter(success=(success == "true"))
+
+        # ==========================
+        # ORDINAMENTO
+        # ==========================
+
+        ordering = request.query_params.get(
+            "ordering",
+            "-executed_at",
+        )
+
+        if ordering not in self.VALID_ORDERING:
+            return Response(
+                {
+                    "detail": (
+                        "Ordinamento non valido. "
+                        "Valori consentiti: "
+                        f"{', '.join(self.VALID_ORDERING)}"
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        checks = checks.order_by(ordering)
+
+        # ==========================
+        # PAGINAZIONE
+        # ==========================
 
         paginator = HistoryPagination()
 
@@ -299,6 +388,18 @@ class MonitorCheckHistoryView(APIView):
 
 class MonitorIncidentHistoryView(APIView):
 
+    VALID_ORDERING = (
+        "started_at",
+        "-started_at",
+        "duration_seconds",
+        "-duration_seconds",
+    )
+
+    VALID_STATUS = (
+        "active",
+        "resolved",
+    )
+
     def get(self, request, pk):
 
         try:
@@ -312,31 +413,97 @@ class MonitorIncidentHistoryView(APIView):
 
         incidents = monitor.incidents.all()
 
+        # ==========================
+        # FILTRO DATA
+        # ==========================
+
         try:
+
             from_date = parse_date(request.query_params.get("from"))
 
             to_date = parse_date(request.query_params.get("to"))
 
         except ValueError as e:
+
             return Response(
                 {"detail": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         if from_date and to_date:
+
             incidents = incidents.filter(
                 started_at__lte=to_date,
             ).filter(Q(ended_at__gte=from_date) | Q(ended_at__isnull=True))
 
         elif from_date:
+
             incidents = incidents.filter(
                 Q(ended_at__gte=from_date) | Q(ended_at__isnull=True)
             )
 
         elif to_date:
+
             incidents = incidents.filter(
                 started_at__lte=to_date,
             )
+
+        # ==========================
+        # FILTRO STATO
+        # ==========================
+
+        incident_status = request.query_params.get("status")
+
+        if incident_status is not None:
+
+            if incident_status not in self.VALID_STATUS:
+
+                return Response(
+                    {
+                        "detail": (
+                            "Valore non valido per 'status'. "
+                            "Valori consentiti: "
+                            f"{', '.join(self.VALID_STATUS)}"
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if incident_status == "active":
+
+                incidents = incidents.filter(ended_at__isnull=True)
+
+            elif incident_status == "resolved":
+
+                incidents = incidents.filter(ended_at__isnull=False)
+
+        # ==========================
+        # ORDINAMENTO
+        # ==========================
+
+        ordering = request.query_params.get(
+            "ordering",
+            "-started_at",
+        )
+
+        if ordering not in self.VALID_ORDERING:
+
+            return Response(
+                {
+                    "detail": (
+                        "Ordinamento non valido. "
+                        "Valori consentiti: "
+                        f"{', '.join(self.VALID_ORDERING)}"
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        incidents = incidents.order_by(ordering)
+
+        # ==========================
+        # PAGINAZIONE
+        # ==========================
 
         paginator = HistoryPagination()
 
