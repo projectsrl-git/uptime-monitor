@@ -80,6 +80,17 @@ L'applicazione permette di monitorare periodicamente endpoint HTTP/HTTPS, regist
 
 ---
 
+### BR5 - Storico e statistiche
+
+- Calcolo uptime percentuale basato sulla durata degli incidenti
+- Calcolo MTBF
+- Statistiche tempi di risposta
+- Storico check filtrabile per data
+- Storico incidenti filtrabile per data
+- Endpoint uptime con periodi predefiniti e custom
+
+---
+
 ## Installazione
 
 ```bash
@@ -173,5 +184,5 @@ python manage.py run_checks
 - [x] BR2 - Scheduler e Check
 - [x] BR3 - Incidenti
 - [x] BR4 - Notifiche
-- [ ] BR5 - Uptime
+- [x] BR5 - Uptime
 - [ ] BR6 - API complete
