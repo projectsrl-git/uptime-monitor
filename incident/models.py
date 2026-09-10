@@ -26,5 +26,9 @@ class Incident(models.Model):
     )
     suppressed_by_maintenance = models.BooleanField(default=False)
 
+    @property
+    def is_active(self):
+        return self.ended_at is None
+
     def __str__(self):
         return f"{self.monitor.name} - {self.started_at}"
