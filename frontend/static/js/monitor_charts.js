@@ -177,205 +177,175 @@ function updateUptimeChart(data) {
 
 function updateResponseTimeChart(data, responseTime) {
 
-    const canvas = document.getElementById(
-        "response-time-chart"
-    );
+    const canvas =
+        document.getElementById(
+            "response-time-chart"
+        );
 
     if (!canvas) {
         return;
-    }
-
-    const now = new Date();
-    const start = new Date(now);
-
-    if (currentPeriod === "24h") {
-        start.setHours(start.getHours() - 24);
-    }
-
-    else if (currentPeriod === "7d") {
-        start.setDate(start.getDate() - 7);
-    }
-
-    else if (currentPeriod === "30d") {
-        start.setDate(start.getDate() - 30);
-    }
-
-    else {
-        start.setDate(start.getDate() - 365);
-    }
-
-    let bucketMilliseconds;
-
-    if (currentPeriod === "24h") {
-        bucketMilliseconds = 60 * 60 * 1000;
-    }
-
-    else if (currentPeriod === "7d") {
-        bucketMilliseconds = 6 * 60 * 60 * 1000;
-    }
-
-    else if (currentPeriod === "30d") {
-        bucketMilliseconds = 24 * 60 * 60 * 1000;
-    }
-
-    else {
-        bucketMilliseconds = 7 * 24 * 60 * 60 * 1000;
-    }
-
-    const labels = [];
-    const values = [];
-
-    let current = new Date(start);
-
-    while (current < now) {
-
-        const bucketEnd = new Date(
-            current.getTime() + bucketMilliseconds
-        );
-
-        const item = data.find(item => {
-
-            const itemDate = new Date(item.date);
-
-            return (
-                itemDate >= current &&
-                itemDate < bucketEnd
-            );
-        });
-
-        labels.push(
-            formatDate(
-                current.toISOString(),
-                currentPeriod
-            )
-        );
-
-        values.push(
-            item ? item.average_ms : null
-        );
-
-        current = bucketEnd;
     }
 
     if (responseTimeChart) {
         responseTimeChart.destroy();
     }
 
-    responseTimeChart = new Chart(canvas, {
 
-        type: "line",
+    const labels = data.map(item =>
+        formatDate(
+            item.date,
+            currentPeriod
+        )
+    );
 
-        data: {
-            labels: labels,
 
-            datasets: [
+    const values = data.map(item =>
+        item.average_ms
+    );
 
-                {
-                    label: "Media",
-                    data: values,
 
-                    tension: 0.35,
+    responseTimeChart = new Chart(
+        canvas,
+        {
 
-                    pointRadius: 0,
-                    pointHoverRadius: 5,
+            type: "line",
 
-                    borderWidth: 2,
+            data: {
 
-                    spanGaps: false
-                },
+                labels: labels,
 
-                {
-                    label: "Minimo",
-                    data: Array(
-                        values.length
-                    ).fill(responseTime.min_ms),
+                datasets: [
 
-                    pointRadius: 0,
-                    borderWidth: 1,
+                    {
+                        label: "Media",
 
-                    borderDash: [6, 6],
+                        data: values,
 
-                    fill: false
-                },
+                        tension: 0.35,
 
-                {
-                    label: "Massimo",
-                    data: Array(
-                        values.length
-                    ).fill(responseTime.max_ms),
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
 
-                    pointRadius: 0,
-                    borderWidth: 1,
+                        borderWidth: 2,
 
-                    borderDash: [6, 6],
+                        fill: false,
 
-                    fill: false
-                }
-
-            ]
-        },
-
-        options: {
-
-            responsive: true,
-            maintainAspectRatio: false,
-
-            interaction: {
-                intersect: false,
-                mode: "index"
-            },
-
-            scales: {
-
-                y: {
-                    beginAtZero: true,
-
-                    title: {
-                        display: true,
-                        text: "Millisecondi (ms)"
+                        spanGaps: false
                     },
 
-                    ticks: {
-                        maxTicksLimit: 8
+                    {
+                        label: "Minimo periodo",
+
+                        data: Array(
+                            values.length
+                        ).fill(
+                            responseTime.min_ms
+                        ),
+
+                        pointRadius: 0,
+
+                        borderWidth: 1,
+
+                        borderDash: [6, 6],
+
+                        fill: false
                     }
-                },
 
-                x: {
-                    grid: {
-                        display: false
-                    },
-
-                    ticks: {
-                        autoSkip: true,
-                        maxTicksLimit: 12,
-                        maxRotation: 0
-                    }
-                }
-
+                ]
             },
 
-            plugins: {
 
-                legend: {
-                    display: true
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+
+                interaction: {
+                    intersect: false,
+                    mode: "index"
                 },
 
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
 
-                            if (context.raw === null) {
-                                return `${context.dataset.label}: nessun dato`;
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        title: {
+                            display: true,
+                            text: "Millisecondi (ms)"
+                        },
+
+                        ticks: {
+                            maxTicksLimit: 5
+                        }
+
+                    },
+
+
+                    x: {
+
+                        grid: {
+                            display: false
+                        },
+
+                        ticks: {
+
+                            autoSkip: true,
+
+                            maxTicksLimit: 6,
+
+                            maxRotation: 0
+
+                        }
+
+                    }
+
+                },
+
+
+                plugins: {
+
+                    legend: {
+                        display: true
+                    },
+
+
+                    tooltip: {
+
+                        callbacks: {
+
+                            label: function (context) {
+
+                                if (
+                                    context.raw === null
+                                ) {
+
+                                    return (
+                                        `${context.dataset.label}: nessun dato`
+                                    );
+
+                                }
+
+                                return (
+                                    `${context.dataset.label}: ${context.raw} ms`
+                                );
+
                             }
 
-                            return `${context.dataset.label}: ${context.raw} ms`;
                         }
+
                     }
+
                 }
 
             }
+
         }
-    });
+    );
 }
 
 
