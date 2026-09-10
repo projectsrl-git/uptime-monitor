@@ -61,6 +61,25 @@ L'applicazione permette di monitorare periodicamente endpoint HTTP/HTTPS, regist
 
 ---
 
+### BR4 - Notifiche
+
+- Sistema di notifiche basato su Strategy Pattern
+- Canali di notifica configurabili tramite variabile d'ambiente
+- Supporto ai notifier:
+  - Console notifier
+  - Email notifier
+- Invio automatico delle notifiche durante i cambi di stato:
+  - apertura incidente (`DOWN`)
+  - risoluzione incidente (`UP`)
+- Configurazione email tramite SMTP e variabili d'ambiente:
+  - server SMTP
+  - porta
+  - username
+  - password
+  - destinatario notifiche
+
+---
+
 ## Installazione
 
 ```bash
@@ -153,6 +172,6 @@ python manage.py run_checks
 - [x] BR1 - CRUD Monitor
 - [x] BR2 - Scheduler e Check
 - [x] BR3 - Incidenti
-- [ ] BR4 - Notifiche
+- [x] BR4 - Notifiche
 - [ ] BR5 - Uptime
 - [ ] BR6 - API complete
