@@ -1,552 +1,266 @@
 # Uptime Monitor
 
-Progetto sviluppato come percorso di onboarding per il ruolo di Junior Python Developer.
+Applicazione Django per monitorare endpoint HTTP/HTTPS, conservare lo storico dei
+controlli, gestire gli incidenti e consultare statistiche e grafici dal browser o
+tramite API REST.
 
-L'applicazione permette di monitorare periodicamente endpoint HTTP/HTTPS, registrare lo storico dei controlli e notificare eventuali cambi di stato.
+## Funzionalita
 
----
+### Monitor
 
-## Tecnologie utilizzate
+- creazione, modifica, duplicazione e disattivazione (soft delete) dei monitor;
+- riattivazione dei monitor disattivati;
+- validazione degli URL `http` e `https`;
+- configurazione di intervallo e timeout del check;
+- scelta del metodo HTTP (`HEAD`, `GET`, `POST`, `PUT`, `PATCH`, `DELETE`,
+  `OPTIONS`);
+- codici di stato accettati e soglia di fallimenti consecutivi;
+- soglia opzionale per risposte lente;
+- header e body della richiesta, con opzione per inviare il body come JSON;
+- autenticazione `none` o `basic`;
+- redirect configurabili e preferenza IPv4, IPv6 o IPv4 prioritario;
+- badge personalizzati.
+
+Ogni monitor espone uno stato calcolato:
+
+| Stato | Significato |
+| --- | --- |
+| `not_started` | non e ancora stato eseguito alcun check |
+| `up` | il monitor e operativo |
+| `down` | esiste un incidente aperto |
+| `paused` | il monitor e disattivato |
+
+### Check e incidenti
+
+Il comando `run_checks`:
+
+1. seleziona i monitor attivi;
+2. esegue solo i check arrivati alla scadenza dell'intervallo;
+3. salva esito, codice HTTP, tempo di risposta ed eventuale errore;
+4. aggiorna lo stato e apre o chiude automaticamente gli incidenti.
+
+I check vengono eseguiti in parallelo (fino a 20 worker). Un incidente viene
+aperto dopo il numero configurato di fallimenti consecutivi e viene chiuso al
+primo check riuscito. La root cause puo essere:
+
+- `connection_timeout`
+- `connection_error`
+- `http_error`
+- `unknown`
+
+### Dashboard web
+
+L'interfaccia include:
+
+- dashboard con elenco monitor, ricerca, filtro per stato e ordinamento;
+- riepilogo di monitor UP, DOWN, PAUSED e NOT STARTED;
+- uptime, tempo di risposta, numero di check, incidenti e downtime per periodo;
+- pagina di dettaglio del monitor con overview, configurazione, grafici, storico
+  check e storico incidenti;
+- elenco e dettaglio degli incidenti, con filtro per stato, ricerca e ordinamento;
+- pagina per confrontare lo stato dei monitor;
+- esportazione delle statistiche in formato Excel.
+
+I periodi disponibili nella dashboard e nelle statistiche sono `24h`, `7d`, `30d`
+e `365d`.
+
+### Notifiche
+
+Le notifiche usano una strategia configurabile tramite `NOTIFICATION_CHANNELS`.
+Sono disponibili:
+
+- `console`;
+- `email`, con invio SMTP all'apertura (`DOWN`) e alla risoluzione (`UP`) di un
+  incidente.
+
+## Stack tecnologico
 
 - Python 3.12
-- Django
+- Django 6
 - Django REST Framework
+- drf-spectacular
 - MySQL
-- Docker
-
----
-
-## Funzionalità implementate
-
-### BR1 - Gestione monitor
-
-- Creazione monitor
-- Modifica monitor
-- Visualizzazione monitor
-- Soft delete (disattivazione)
-- Validazione URL HTTP/HTTPS
-
----
-
-### BR2 - Scheduler e Check
-
-- Esecuzione manuale dei controlli tramite Django Management Command
-- Recupero dei monitor attivi
-- Controllo dell'intervallo configurato per ogni monitor
-- Esecuzione delle richieste HTTP/HTTPS
-- Salvataggio dello storico dei check
-- Registrazione:
-  - esito del controllo
-  - codice HTTP
-  - tempo di risposta
-  - eventuali errori
-
----
-
-### BR3 - Gestione incidenti
-
-- Calcolo dello stato del monitor:
-  - `not_started`
-  - `up`
-  - `down`
-- Gestione dei fallimenti consecutivi tramite soglia configurabile
-- Creazione automatica di un incidente quando un monitor passa in stato DOWN
-- Chiusura automatica dell'incidente quando il monitor torna UP
-- Calcolo della durata dell'incidente
-- Identificazione della root cause:
-  - `connection_timeout`
-  - `connection_error`
-  - `http_error`
-  - `unknown`
-
----
-
-### BR4 - Notifiche
-
-- Sistema di notifiche basato su Strategy Pattern
-- Canali di notifica configurabili tramite variabile d'ambiente
-- Supporto ai notifier:
-  - Console notifier
-  - Email notifier
-- Invio automatico delle notifiche durante i cambi di stato:
-  - apertura incidente (`DOWN`)
-  - risoluzione incidente (`UP`)
-- Configurazione email tramite SMTP e variabili d'ambiente:
-  - server SMTP
-  - porta
-  - username
-  - password
-  - destinatario notifiche
-
----
-
-### BR5 - Storico e statistiche
-
-- Calcolo uptime percentuale basato sulla durata degli incidenti
-- Calcolo MTBF
-- Statistiche tempi di risposta
-- Storico check filtrabile per data
-- Storico incidenti filtrabile per data
-- Endpoint uptime con periodi predefiniti e custom
-
----
-
-### BR6 - API RESTful
-
-- API RESTful per la gestione completa dei monitor
-- Operazioni CRUD sui monitor
-- Endpoint dedicati per:
-  - stato corrente del monitor
-  - storico dei check
-  - storico degli incidenti
-  - statistiche di uptime
-- Filtri sull'elenco monitor:
-  - stato (`up`, `down`, `paused`, `not_started`)
-- Ordinamento dell'elenco monitor:
-  - nome
-  - data di creazione
-  - stato
-- Paginazione degli endpoint che restituiscono collezioni
-- Serializer separati per lettura e scrittura
-- Risposte JSON con codici HTTP appropriati
-
----
+- Requests
+- openpyxl
 
 ## Installazione
 
 ```bash
-git clone ...
+git clone <URL_DEL_REPOSITORY>
 cd uptime-monitor
-```
-
-Creare un ambiente virtuale:
-
-```bash
 python -m venv .venv
 ```
 
-Attivarlo:
+Attivazione dell'ambiente virtuale:
 
-Windows
+**Windows PowerShell**
 
-```bash
-.venv\Scripts\activate
+```powershell
+.\.venv\Scripts\Activate.ps1
 ```
 
-Linux/macOS
+**Linux/macOS**
 
 ```bash
 source .venv/bin/activate
 ```
 
-Installare le dipendenze:
+Installazione delle dipendenze:
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+## Configurazione
 
-## Migrazioni
+Copiare `.env.example` in `.env` e valorizzare almeno le variabili del database:
+
+```dotenv
+DB_NAME=uptime_monitor
+DB_USER=...
+DB_PASSWORD=...
+DB_HOST=127.0.0.1
+DB_PORT=3306
+SECRET_KEY=...
+DEBUG=True
+```
+
+Per abilitare le notifiche email:
+
+```dotenv
+NOTIFICATION_CHANNELS=console,email
+NOTIFICATION_EMAIL=destinatario@example.com
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=...
+EMAIL_HOST_PASSWORD=...
+```
+
+`NOTIFICATION_CHANNELS` accetta uno o piu valori separati da virgola. Se non viene
+impostato, viene usato `console`.
+
+> In produzione impostare una `SECRET_KEY` sicura, disattivare `DEBUG` e
+> configurare correttamente gli host consentiti prima di esporre l'applicazione.
+
+## Migrazioni e avvio
 
 ```bash
 python manage.py migrate
-```
-
-Creare un superuser:
-
-```bash
 python manage.py createsuperuser
-```
-
----
-
-## Avvio
-
-Avviare il server:
-
-```bash
 python manage.py runserver
 ```
 
-Eseguire manualmente i check:
+URL principali:
+
+- dashboard: <http://127.0.0.1:8000/>
+- admin Django: <http://127.0.0.1:8000/admin/>
+- API: <http://127.0.0.1:8000/api/>
+
+## Esecuzione dei check
+
+Il progetto non include un processo scheduler persistente: `run_checks` deve
+essere invocato periodicamente da cron, Utilita di pianificazione di Windows o
+da un altro orchestratore.
 
 ```bash
 python manage.py run_checks
 ```
 
-Admin:
+## API REST
 
-```
-http://127.0.0.1:8000/admin/
-```
+Tutti gli endpoint API usano il prefisso `/api/`.
 
-API:
+### Monitor
 
-```
-http://127.0.0.1:8000/api/monitors/
-```
+| Metodo | Endpoint | Descrizione |
+| --- | --- | --- |
+| `GET` | `/api/monitors/` | elenco monitor |
+| `POST` | `/api/monitors/` | crea monitor |
+| `GET` | `/api/monitors/{id}/` | dettaglio e stato corrente |
+| `PUT`/`PATCH` | `/api/monitors/{id}/` | modifica monitor |
+| `DELETE` | `/api/monitors/{id}/` | disattiva il monitor |
+| `POST` | `/api/monitors/{id}/activate/` | riattiva il monitor |
+| `POST` | `/api/monitors/{id}/duplicate/` | crea una copia della configurazione |
+| `GET` | `/api/monitors/{id}/checks/` | storico dei check |
+| `GET` | `/api/monitors/{id}/incidents/` | storico degli incidenti |
+| `GET` | `/api/monitors/{id}/uptime/` | uptime e tempi di risposta |
+| `GET` | `/api/monitors/{id}/statistics/` | statistiche complete del monitor |
 
----
+Filtro e ordinamento elenco monitor:
 
-## Esecuzione controlli
-
-Per eseguire manualmente il controllo dei monitor:
-
-```bash
-python manage.py run_checks
-```
-
----
-
-# API REST
-
-Base URL:
-
-```
-/api/
+```text
+/api/monitors/?status=down
+/api/monitors/?ordering=-created_at
+/api/monitors/?ordering=status
 ```
 
----
+`status` accetta `up`, `down`, `paused` e `not_started`. L'ordinamento supporta
+`name`, `-name`, `created_at`, `-created_at`, `status` e `-status`.
 
-# Monitors
+Lo storico dei check supporta:
 
-## Elenco monitor
-
-```
-GET /api/monitors/
-```
-
-Restituisce l'elenco dei monitor disponibili.
-
-### Filtri disponibili
-
-Il parametro `status` permette di filtrare i monitor per stato corrente.
-
-Esempio:
-
-```
-GET /api/monitors/?status=up
+```text
+/api/monitors/1/checks/?from=2026-07-01&to=2026-07-31&success=false&ordering=-response_time_ms&page_size=20
 ```
 
-Valori ammessi:
+I parametri disponibili sono `from`, `to`, `success=true|false`,
+`ordering=executed_at|-executed_at|response_time_ms|-response_time_ms`,
+`page` e `page_size` (massimo 100).
 
-- `up`
-- `down`
-- `paused`
-- `not_started`
+Lo storico degli incidenti supporta `from`, `to`, `status=active|resolved`,
+`ordering=started_at|-started_at|duration_seconds|-duration_seconds`, `page` e
+`page_size`.
 
-Esempi:
+### Uptime
 
-```
-GET /api/monitors/?status=down
-```
-
-restituisce solo i monitor con incidenti attivi.
-
-```
-GET /api/monitors/?status=paused
+```text
+GET /api/monitors/1/uptime/?period=24h
 ```
 
-restituisce i monitor disattivati.
+`period` accetta `24h`, `7d`, `30d` e `365d`. La risposta contiene uptime
+percentuale, downtime, MTBF, tempi minimo/medio/massimo e dati aggregati nel
+periodo.
 
----
+### Incidenti globali
 
-## Ordinamento
-
-Il parametro `ordering` permette di ordinare i risultati.
-
-Formato:
-
-```
-?ordering=<campo>
+```text
+GET /api/incidents/
+GET /api/incidents/?status=active&search=api&ordering=-started_at
+GET /api/statistics/incidents/
 ```
 
-Campi disponibili:
+`/api/incidents/` e un endpoint in sola lettura e supporta `status=active|resolved`,
+la ricerca per nome monitor o root cause e l'ordinamento per `started_at`.
 
-| Parametro | Descrizione |
-|---|---|
-| `name` | ordine alfabetico crescente |
-| `-name` | ordine alfabetico decrescente |
-| `created_at` | monitor meno recenti prima |
-| `-created_at` | monitor più recenti prima |
-| `status` | monitor UP prima |
-| `-status` | monitor DOWN prima |
+### Statistiche globali e export
 
-Esempi:
-
-```
-GET /api/monitors/?ordering=name
-
-GET /api/monitors/?ordering=-created_at
-
-GET /api/monitors/?ordering=-status
+```text
+GET /api/statistics/?period=7d
+GET /api/monitors/1/statistics/?period=7d
+GET /api/statistics/export/?period=30d&monitor_ids=1,2&include_summary=true&include_monitor_sheets=true
 ```
 
----
+Il primo endpoint restituisce uptime medio, tempo di risposta medio, numero di
+check, incidenti e downtime. L'endpoint `/api/monitors/{id}/statistics/`
+restituisce anche serie temporali di response time, check, uptime e incidenti.
 
-## Paginazione
+L'endpoint `/api/statistics/export/` scarica `monitor-statistics.xlsx`. I
+parametri `monitor_ids`, `include_summary` e `include_monitor_sheets` controllano
+rispettivamente i monitor inclusi, il riepilogo generale e le schede dei singoli
+monitor.
 
-Gli endpoint che restituiscono liste supportano la paginazione tramite `PageNumberPagination`.
+Gli endpoint di storico e `/api/incidents/` sono paginati e restituiscono `count`,
+`page`, `num_pages`, `page_size`, `next`, `previous` e `results`. L'elenco
+`/api/monitors/` restituisce invece direttamente la lista dei monitor.
 
-Parametri disponibili:
+## Struttura del progetto
 
+```text
+config/             configurazione Django e URL principali
+monitor/            modello, API e servizi dei monitor
+check/              modello, servizio e comando di esecuzione dei check
+incident/           modello, API e gestione del ciclo di vita degli incidenti
+monitoring_stats/   statistiche, serie temporali ed export Excel
+notification/       notifier console ed email
+frontend/           viste, template, CSS e JavaScript della dashboard
 ```
-?page=1
-```
-
-e:
-
-```
-?page_size=20
-```
-
-Esempio:
-
-```
-GET /api/monitors/?page=2&page_size=20
-```
-
-Formato risposta:
-
-```json
-{
-    "count": 50,
-    "next": "/api/monitors/?page=3",
-    "previous": "/api/monitors/?page=1",
-    "results": []
-}
-```
-
----
-
-## Creazione Monitor
-
-```
-POST /api/monitors/
-```
-
-Crea un nuovo monitor.
-
-Risposte:
-
-- 201 Created se il monitor viene creato correttamente.
-- 400 Bad Request se i dati inviati non sono validi.
-
----
-
-# Eliminazione monitor
-
-## Endpoint
-
-```
- DELETE /api/monitors/{id}/
-```
-
-L'eliminazione esegue una disattivazione logica del monitor impostando il campo `is_active` a `false`.
-
-## Risposta
-
-```
-204 No Content
-```
-
----
-
-# Stato corrente monitor
-
-## Endpoint
-
-```
-GET /api/monitors/{id}/
-```
-
-La risposta include lo stato corrente calcolato del monitor.
-
-Valori possibili:
-
-- `up`
-- `down`
-- `paused`
-- `not_started`
-
-## Esempio risposta
-
-```json
-{
-"id": 1,
-"name": "Google",
-"status": "up"
-}
-```
-
----
-
-# Storico check
-
-## Endpoint
-
-```
-GET /api/monitors/{id}/checks/
-```
-
-Restituisce lo storico dei controlli eseguiti dal monitor.
-
-## Parametri opzionali
-
-- `from`: data iniziale nel formato `YYYY-MM-DD`
-- `to`: data finale nel formato `YYYY-MM-DD`
-
-## Esempio richiesta
-
-```
-GET /api/monitors/1/checks/?from=2026-07-01&to=2026-07-24
-```
-
-L'endpoint supporta la paginazione tramite:
-
-- `page`
-- `page_size`
-
----
-# Storico incidenti
-
-## Endpoint
-
-```
-GET /api/monitors/{id}/incidents/
-```
-
-Restituisce lo storico degli incidenti associati al monitor.
-
-## Parametri opzionali
-
-- `from`: data iniziale nel formato `YYYY-MM-DD`
-- `to`: data finale nel formato `YYYY-MM-DD`
-
-## Esempio richiesta
-
-```
-GET /api/monitors/1/incidents/?from=2026-07-01
-```
-
-L'endpoint supporta la paginazione tramite:
-
-- `page`
-- `page_size`
-
----
-
-# Uptime monitor
-
-## Endpoint
-
-```
-GET /api/monitors/{id}/uptime/
-```
-
-Restituisce le statistiche di uptime del monitor calcolate su un intervallo temporale.
-
-## Periodi disponibili
-
-Periodi predefiniti:
-
-```
-?period=24h
-```
-```
-?period=7d
-```
-```
-?period=30d
-```
-
-Intervallo personalizzato:
-
-```
-?period=custom&from=2026-07-01&to=2026-07-24
-```
-
-## Esempio risposta
-
-```json
-{
-    "uptime_percentage": 99.98,
-    "downtime_seconds": 10,
-    "mtbf_seconds": 3600,
-    "response_time": {
-        "average_ms": 120,
-        "minimum_ms": 80,
-        "maximum_ms": 200
-    }
-}
-```
----
-
-# Gestione errori
-
-Gli errori delle API vengono restituiti in formato JSON con un messaggio descrittivo.
-
-## Esempio errore
-
-```json
-{
-    "detail": "Monitor non trovato"
-}
-```
-
----
-
-# Codici HTTP utilizzati
-
-| Codice HTTP | Significato |
-|-------------|-------------|
-| 200 OK | Richiesta completata correttamente |
-| 201 Created | Risorsa creata correttamente |
-| 204 No Content | Operazione completata senza contenuto |
-| 400 Bad Request | Richiesta non valida |
-| 404 Not Found | Risorsa non trovata |
-
----
-
-# Struttura generale API
-
-Tutte le API sono esposte sotto il prefisso:
-
-```
-/api/
-```
-
-Gli endpoint principali disponibili sono:
-
-- `/api/monitors/`
-- `/api/monitors/{id}/`
-- `/api/monitors/{id}/checks/`
-- `/api/monitors/{id}/incidents/`
-- `/api/monitors/{id}/uptime/`
-
----
-
-# Paginazione
-
-Gli endpoint che restituiscono liste utilizzano la paginazione standard DRF.
-
-Parametri disponibili:
-
-- `page`
-- `page_size`
-
-Esempio:
-
-```
-?page=2&page_size=20
-```
-
-La risposta contiene:
-
-- numero totale di risultati
-- pagina successiva
-- pagina precedente
-- risultati della pagina corrente
-
----

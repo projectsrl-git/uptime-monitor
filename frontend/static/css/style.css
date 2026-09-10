@@ -868,6 +868,57 @@ body.dashboard-page {
     font-weight: 600;
 }
 
+/****************/
+/* EXPORTS DATA */
+/****************/
+
+.export-monitor-list {
+    padding: .65rem .9rem;
+
+    background-color: #212529;
+
+    border: 1px solid #495057;
+    border-radius: 8px;
+}
+
+.export-monitor-row {
+    padding: .3rem 0;
+}
+
+.export-select-all {
+    padding-bottom: .45rem;
+
+    border-bottom: 1px solid #495057;
+}
+
+.export-monitor-label {
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: .45rem;
+}
+
+.export-monitor-name {
+    color: #dee2e6;
+
+    font-weight: 500;
+}
+
+.export-monitor-badges {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: .25rem;
+}
+
+.export-monitor-badges .badge {
+    font-size: .65rem;
+    font-weight: 500;
+}
 
 /***************/
 /* RESPONSIVE  */
